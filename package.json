@@ -15,7 +15,7 @@
     "build": "npm run build -w @vibe/shared && npm run build -w @vibe/api && npm run build -w @vibe/web",
     "test": "npm run build -w @vibe/shared && npm run test -ws --if-present",
     "lint": "eslint .",
-    "typecheck": "npm run typecheck -w @vibe/shared && npm run typecheck -w @vibe/api && npm run typecheck -w @vibe/web"
+    "typecheck": "npm run build -w @vibe/shared && npm run typecheck -w @vibe/shared && npm run typecheck -w @vibe/api && npm run typecheck -w @vibe/web"
   },
   "devDependencies": {
     "@eslint/js": "^9.24.0",
