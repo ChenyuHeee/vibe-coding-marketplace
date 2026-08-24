@@ -8,7 +8,7 @@
  * 移动端隐藏，由 TabBar 承担导航。
  */
 import { Link, NavLink } from 'react-router-dom';
-import { LayoutGrid, LibraryBig, LogIn, ShoppingCart, UserRound, Wallet } from 'lucide-react';
+import { LayoutGrid, LibraryBig, LogIn, ShoppingCart, Store, UserRound, Wallet } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import { useAuth } from '../../context/AuthContext';
 import { ROLE_LABELS, useCurrentRole } from '../../context/RoleContext';
@@ -44,6 +44,16 @@ export function TopNav() {
               {label}
             </NavLink>
           ))}
+          {/* 卖家工作台：仅 seller 角色可见（D4 导航按当前账号角色呈现） */}
+          {user?.roles.includes('seller') && (
+            <NavLink
+              to="/sell"
+              className={({ isActive }) => `topnav__link${isActive ? ' topnav__link--active' : ''}`}
+            >
+              <Store size={16} aria-hidden="true" />
+              卖家工作台
+            </NavLink>
+          )}
           {/* My Library 永远可见（§5.1），不折叠 */}
           <NavLink
             to="/library"

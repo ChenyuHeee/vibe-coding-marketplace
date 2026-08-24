@@ -2140,3 +2140,352 @@
   flex-shrink: 0;
   text-align: right;
 }
+
+/* --------------------------------------------------------------------------
+   FileDropzone（区域 2 上传拖放区：四状态 空/进行中/错误/成功）
+   -------------------------------------------------------------------------- */
+.dropzone {
+  border: 2px dashed var(--color-separator-opaque);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.dropzone--dragging {
+  border-color: var(--color-brand);
+  background: var(--color-brand-subtle);
+}
+.dropzone--error {
+  border-color: var(--color-error);
+}
+.dropzone--ready {
+  border-style: solid;
+  border-color: var(--color-success);
+}
+.dropzone__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+  cursor: pointer;
+}
+.dropzone__body:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-lg);
+}
+.dropzone--compact .dropzone__body {
+  padding: var(--space-4);
+}
+.dropzone__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--color-brand-subtle);
+  color: var(--color-brand);
+}
+.dropzone__icon--error {
+  background: var(--color-error-subtle);
+  color: var(--color-error);
+}
+.dropzone__icon--ok {
+  background: var(--color-success-subtle);
+  color: var(--color-success);
+}
+.dropzone__spinner {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.dropzone__title,
+.dropzone__hint {
+  margin: 0;
+}
+.dropzone__error-body {
+  cursor: default;
+}
+.dropzone__actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.dropzone__progress {
+  width: 100%;
+  max-width: 360px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-subtle);
+  overflow: hidden;
+  min-width: 44px;
+}
+.dropzone__progress-bar {
+  height: 100%;
+  background: var(--color-brand);
+  border-radius: var(--radius-full);
+  transition: width 0.12s linear;
+}
+.dropzone__progress-text {
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   ProjectMetaForm（上传表单字段）
+   -------------------------------------------------------------------------- */
+.project-meta-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.project-meta-form__textarea {
+  min-height: 110px;
+  resize: vertical;
+  font-family: var(--font-sans);
+  line-height: var(--text-body-lh);
+  padding: var(--space-3);
+}
+.project-meta-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+@media (max-width: 767px) {
+  .project-meta-form__row {
+    grid-template-columns: 1fr;
+  }
+}
+.project-meta-form__price-toggle {
+  display: flex;
+  gap: var(--space-2);
+}
+.project-meta-form__price-input {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+.project-meta-form__price-input .form-input {
+  max-width: 180px;
+}
+.project-meta-form__fee {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-secondary);
+}
+.project-meta-form__fee strong {
+  color: var(--color-success-text);
+}
+
+/* --------------------------------------------------------------------------
+   SellPage（卖家工作台）
+   -------------------------------------------------------------------------- */
+.sell-page__sub {
+  margin: 0 0 var(--space-6);
+}
+.sell-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+.sell-form__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+}
+.sell-form__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.sell-form__draft-note {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+}
+
+.sell-mine__title {
+  margin-bottom: var(--space-3);
+}
+.sell-mine__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.sell-mine__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  flex-wrap: wrap;
+}
+.sell-mine__main {
+  flex: 1;
+  min-width: 200px;
+}
+.sell-mine__title {
+  margin: 0;
+}
+.sell-mine__main .text-caption {
+  margin: 2px 0 0;
+  display: block;
+}
+.sell-mine__badge {
+  flex-shrink: 0;
+}
+.sell-mine__actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.sell-mine__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+}
+
+/* --------------------------------------------------------------------------
+   SellerProjectPage（审核进度 / 编辑 / 下架）
+   -------------------------------------------------------------------------- */
+.seller-project {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.seller-project__back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  text-decoration: none;
+  color: var(--color-text-secondary);
+  width: fit-content;
+}
+.seller-project__back:hover {
+  color: var(--color-brand);
+}
+.seller-project__title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.seller-project__title-row .page__title {
+  margin-bottom: 0;
+}
+.seller-project__progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.seller-project__status-note p {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.seller-project__status-icon--ok {
+  color: var(--color-success);
+  flex-shrink: 0;
+}
+.seller-project__status-icon--spin {
+  color: var(--color-brand);
+  flex-shrink: 0;
+  animation: spin 1s linear infinite;
+}
+.seller-project__history {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--color-separator);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+}
+.seller-project__history-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.seller-project__info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.seller-project__info p {
+  margin: 0;
+}
+.seller-project__desc {
+  white-space: pre-wrap;
+  color: var(--color-text-secondary);
+}
+.seller-project__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.seller-project__edit-file {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* DelistDialog（下架二次确认：理由必填 + 后果说明） */
+.delist-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.delist-dialog__consequence {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-left: 3px solid var(--color-warning);
+  background: var(--color-warning-subtle);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+.delist-dialog__consequence svg {
+  color: var(--color-warning);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.delist-dialog__consequence p {
+  margin: 0;
+}
+.delist-dialog__reasons {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.delist-dialog__reason {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+}
+.delist-dialog__note {
+  min-height: 72px;
+  resize: vertical;
+  font-family: var(--font-sans);
+}

@@ -13,6 +13,8 @@ import { MarketplacePage } from './pages/MarketplacePage';
 import { ProjectDetailPage } from './pages/ProjectDetailPage';
 import { LibraryPage } from './pages/LibraryPage';
 import { WalletPage } from './pages/WalletPage';
+import { SellPage } from './pages/SellPage';
+import { SellerProjectPage } from './pages/SellerProjectPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
@@ -54,6 +56,23 @@ export default function App() {
           element={
             <RequireAuth>
               <ProfilePage />
+            </RequireAuth>
+          }
+        />
+        {/* 卖家工作台（seller 角色守卫在页面内：无角色引导开通） */}
+        <Route
+          path="/sell"
+          element={
+            <RequireAuth>
+              <SellPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/sell/:id"
+          element={
+            <RequireAuth>
+              <SellerProjectPage />
             </RequireAuth>
           }
         />
