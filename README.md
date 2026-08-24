@@ -22,13 +22,35 @@
 ## 仓库结构
 
 ```
-apps/web       前端应用（React + Vite，由架构决策确认）
-apps/api       后端 API（Express，由架构决策确认）
-packages/shared 共享类型
-docs/          PRD / 架构 / 设计系统 / 状态词汇表 / 协作规范
-.github/       Issue / PR 模板，CI workflow
+apps/web         前端应用（React + Vite + TS）
+apps/api         后端 API（Express + TS，端口 3001）
+packages/shared  共享类型与常量（@vibe/shared：状态词 / 角色 / 健康检查）
+docs/            PRD / 架构 / API / 设计系统 / 状态词汇表 / 协作规范
+.github/         Issue / PR 模板，CI workflow（install → lint → typecheck → build → test）
 ```
 
 ## 本地运行
 
-（由架构决策落地后补充 —— 见 docs/ARCHITECTURE.md）
+要求：**Node.js ≥ 22**（内置 `node:sqlite`；推荐 22.x LTS）、npm ≥ 10。
+
+```bash
+# 1) 安装依赖（一次性；npm workspaces 会自动链接 @vibe/shared）
+npm install
+
+# 2) 启动开发环境（并行运行 api :3001 与 web :5173；web 的 /api 会代理到 api）
+npm run dev
+```
+
+- 打开 http://localhost:5173 应看到首页标题「Vibe Coding Marketplace」并显示 API 状态。
+- 直接验证后端：`curl http://localhost:3001/health` → `{"ok":true,...}`。
+
+其他脚本：
+
+```bash
+npm run build       # 按依赖顺序构建 shared → api → web
+npm test            # vitest：api /health 测试 + web 组件测试
+npm run lint        # ESLint 9（flat config，覆盖全仓库）
+npm run typecheck   # tsc --noEmit（shared → api → web）
+```
+
+环境变量见 [.env.example](.env.example)（端口 / CORS / JWT_SECRET / 数据与上传目录）。详细技术决策见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)，接口设计见 [docs/API.md](docs/API.md)。
