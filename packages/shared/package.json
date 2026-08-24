@@ -1,0 +1,15 @@
+{
+  "name": "@vibe/shared",
+  "version": "0.1.0",
+  "private": true,
+  "description": "前后端共享类型与常量（状态词、角色、健康检查）",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "vibe-coding-marketplace",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Vibe Coding Marketplace —— 交易「能运行的作品」的在线市场（课程项目）",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run build -w @vibe/shared && concurrently -k -n api,web -c blue,green \"npm run dev -w @vibe/api\" \"npm run dev -w @vibe/web\"",
+    "build": "npm run build -w @vibe/shared && npm run build -w @vibe/api && npm run build -w @vibe/web",
+    "test": "npm run build -w @vibe/shared && npm run test -ws --if-present",
+    "lint": "eslint .",
+    "typecheck": "npm run typecheck -w @vibe/shared && npm run typecheck -w @vibe/api && npm run typecheck -w @vibe/web"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.24.0",
+    "concurrently": "^9.1.2",
+    "eslint": "^9.24.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^16.0.0",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.29.0"
+  }
+}
