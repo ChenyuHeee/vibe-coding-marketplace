@@ -1,27 +1,14 @@
 /**
  * 前端本地类型定义（不修改 packages/shared —— 由后端负责对齐）。
- * 需要共享类型时只读 import @vibe/shared。
+ * 用户/认证相关类型**直接复用** @vibe/shared 的 SafeUser / AuthResponse（只读 import），
+ * 避免本地副本与后端漂移（isAdmin / ratingAvg 等字段以后端为准）。
  */
-import type { Role } from '@vibe/shared';
+import type { AuthResponse, Role, SafeUser } from '@vibe/shared';
 
-export type { Role };
+export type { AuthResponse, Role, SafeUser };
 
-/** GET /api/auth/me 返回的用户 */
-export interface User {
-  id: string;
-  email: string;
-  displayName: string;
-  roles: Role[];
-  avatarUrl: string | null;
-  ratingAvg: number | null;
-  ratingCount: number;
-}
-
-/** 注册/登录响应（API.md §1） */
-export interface AuthResponse {
-  user: User;
-  token: string;
-}
+/** 前端组件通用别名（组件代码用 User 指代登录用户，与 SafeUser 同一形状） */
+export type User = SafeUser;
 
 /** 统一错误体：{ error: { code, message, details? } }（API.md 约定） */
 export interface ApiErrorBody {

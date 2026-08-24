@@ -242,7 +242,11 @@ export function IntentInput({
             }}
             aria-label="描述你想做的事"
           />
-          <div className="intent-input__examples" aria-label="示例（点击填入）">
+          <div
+            className="intent-input__examples"
+            role="group"
+            aria-label="示例（点击填入）"
+          >
             {examples.slice(0, 3).map((example) => (
               <button
                 key={example}

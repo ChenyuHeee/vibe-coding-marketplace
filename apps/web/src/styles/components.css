@@ -174,12 +174,9 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.08),
-    transparent
-  );
+  /* 扫光用系统分隔色 token（light #E5E5EA / dark #3A3A3C 自动适配），低透明度避免过强 */
+  background: linear-gradient(90deg, transparent, var(--color-separator), transparent);
+  opacity: 0.45;
   animation: shimmer 1.4s ease-in-out infinite;
 }
 @keyframes shimmer {
@@ -257,7 +254,7 @@
 .stepper__item--done .stepper__marker {
   background: var(--color-success);
   border-color: var(--color-success);
-  color: #ffffff;
+  color: var(--color-on-success);
 }
 .stepper__item--current .stepper__marker {
   background: var(--color-brand-subtle);

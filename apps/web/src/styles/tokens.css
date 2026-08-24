@@ -23,6 +23,7 @@
   --color-success: #16a34a;
   --color-success-text: #15803d;
   --color-success-subtle: #f0fdf4;
+  --color-on-success: #0f1420;
 
   --color-warning: #d97706;
   --color-warning-text: #b45309;
@@ -31,6 +32,7 @@
   --color-error: #dc2626;
   --color-error-text: #b91c1c;
   --color-error-subtle: #fef2f2;
+  --color-on-error: #ffffff;
 
   --color-info: #0284c7;
   --color-info-text: #0369a1;
@@ -103,11 +105,6 @@
 
   /* ---- 触控目标 §7.4 ---- */
   --touch-target: 44px;
-
-  /* ---- 业务常量（集中配置，见 docs/DECISIONS.md） ---- */
-  --topup-confirm-threshold-cr: 100; /* A1：大额充值二次确认阈值（CR） */
-  --fee-rate: 0.05; /* A5：平台手续费 5% */
-  --withdrawal-eta-days: '1–3 个工作日'; /* A4 */
 }
 
 /* ---- 深色模式（系统偏好，自动） ---- */
@@ -122,6 +119,7 @@
     --color-success: #4ade80;
     --color-success-text: #4ade80;
     --color-success-subtle: rgba(74, 222, 128, 0.14);
+    --color-on-success: #0f1420;
 
     --color-warning: #fbbf24;
     --color-warning-text: #fbbf24;
@@ -130,6 +128,7 @@
     --color-error: #f87171;
     --color-error-text: #f87171;
     --color-error-subtle: rgba(248, 113, 113, 0.14);
+    --color-on-error: #0f1420;
 
     --color-info: #38bdf8;
     --color-info-text: #38bdf8;
@@ -172,6 +171,7 @@
   --color-success: #16a34a;
   --color-success-text: #15803d;
   --color-success-subtle: #f0fdf4;
+  --color-on-success: #0f1420;
 
   --color-warning: #d97706;
   --color-warning-text: #b45309;
@@ -180,6 +180,7 @@
   --color-error: #dc2626;
   --color-error-text: #b91c1c;
   --color-error-subtle: #fef2f2;
+  --color-on-error: #ffffff;
 
   --color-info: #0284c7;
   --color-info-text: #0369a1;
@@ -218,6 +219,7 @@
   --color-success: #4ade80;
   --color-success-text: #4ade80;
   --color-success-subtle: rgba(74, 222, 128, 0.14);
+  --color-on-success: #0f1420;
 
   --color-warning: #fbbf24;
   --color-warning-text: #fbbf24;
@@ -226,6 +228,7 @@
   --color-error: #f87171;
   --color-error-text: #f87171;
   --color-error-subtle: rgba(248, 113, 113, 0.14);
+  --color-on-error: #0f1420;
 
   --color-info: #38bdf8;
   --color-info-text: #38bdf8;

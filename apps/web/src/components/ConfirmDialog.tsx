@@ -6,7 +6,7 @@
  * - 必须展示**动作后果**（余额变化 / 到账时间 / 不可逆提示）；
  * - 确认按钮文案 = 动词 + 对象（「确认放款」「确认充值 ¥500」），禁止裸「确定」。
  */
-import { useEffect, useRef } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
@@ -44,6 +44,8 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
+  // 弹窗标题 id 用 useId 生成，避免多实例/多页面静态 id 冲突
+  const titleId = useId();
 
   // focus 管理：打开时焦点入弹窗（优先确认按钮），关闭时还原到触发元素
   useEffect(() => {
@@ -115,10 +117,10 @@ export function ConfirmDialog({
         className="confirm-dialog"
         role="dialog"
         aria-modal="true"
-        aria-labelledby="confirm-dialog-title"
+        aria-labelledby={titleId}
       >
         <div className="confirm-dialog__header">
-          <h3 id="confirm-dialog-title" className="confirm-dialog__title text-h3">
+          <h3 id={titleId} className="confirm-dialog__title text-h3">
             {title}
           </h3>
           <button

@@ -32,6 +32,12 @@ export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
 }
 
+/**
+ * 安全权衡（ARCHITECTURE §5 认证方案）：
+ * JWT 存 localStorage 是课程项目的既定方案（无状态、简单）；已知权衡是
+ * XSS 可窃取 token（对比 httpOnly cookie）。缓解：本应用不渲染用户注入的
+ * HTML（React 默认转义）、上传作品以 sandbox iframe 隔离（Phase 2）。
+ */
 export function setToken(token: string): void {
   localStorage.setItem(TOKEN_KEY, token);
 }
@@ -75,8 +81,10 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     throw new ApiError(0, 'NETWORK', '网络连接不稳定，服务器没有响应。');
   }
 
-  // 401：清除本地凭证，通知全局登出
-  if (response.status === 401) {
+  // 401：仅当「请求时已携带 token」才视为会话失效 —— 清凭证并广播登出。
+  // 登录接口本身的 401（邮箱或密码错误）是普通业务错误，不触发登出。
+  const carriedToken = auth && token;
+  if (response.status === 401 && carriedToken) {
     clearToken();
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new Event(UNAUTHORIZED_EVENT));

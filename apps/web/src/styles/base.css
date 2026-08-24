@@ -227,10 +227,11 @@ button:disabled .btn-icon,
   color: var(--color-text-primary);
 }
 
-/* 危险实心（二次确认中的不可逆动作，如确认放款） */
+/* 危险实心（二次确认中的不可逆动作，如确认放款）。
+   文字用 --color-on-error：light #FFF on #DC2626 4.83:1 / dark #0F1420 on #F87171 6.65:1（AA） */
 .btn-danger {
   background: var(--color-error);
-  color: #ffffff;
+  color: var(--color-on-error);
   border-color: var(--color-error);
 }
 .btn-danger:hover:not(:disabled) {
