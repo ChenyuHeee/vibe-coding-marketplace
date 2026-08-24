@@ -219,9 +219,13 @@ export function saveSingleHtml(uploadsDir: string, projectId: string, buffer: Bu
  * 返回相对路径（如 'index.html' 或 'src/main.html'）。
  */
 export function findZipEntryFile(uploadsDir: string, projectId: string): string {
-  const dir = projectDir(uploadsDir, projectId);
+  return findDirEntryFile(projectDir(uploadsDir, projectId));
+}
+
+/** 目录内找入口 HTML：优先 index.html/index.htm，否则第一个白名单 .html/.htm 文件 */
+export function findDirEntryFile(dir: string): string {
   if (!fs.existsSync(dir)) {
-    throw ApiError.badRequest('VALIDATION', 'zip 内没有任何文件被保留');
+    throw ApiError.badRequest('VALIDATION', '目录内没有任何文件被保留');
   }
   for (const name of ['index.html', 'index.htm']) {
     if (fs.existsSync(path.join(dir, name))) return name;
@@ -230,7 +234,7 @@ export function findZipEntryFile(uploadsDir: string, projectId: string): string 
   if (found) return found;
   throw ApiError.badRequest(
     'VALIDATION',
-    'zip 内没有可用的 HTML 入口文件（需包含 .html/.htm 文件）',
+    '交付物内没有可用的 HTML 入口文件（需包含 .html/.htm 文件）',
   );
 }
 
@@ -266,18 +270,17 @@ export interface ResolvedPlayFile {
   relativeName: string;
 }
 
+/** 里程碑交付物目录：uploads/milestones/<contractId>/<seq>/ */
+export function milestoneDir(uploadsDir: string, contractId: string, seq: number): string {
+  return path.join(uploadsDir, 'milestones', contractId, String(seq));
+}
+
 /**
- * 安全解析试玩/回放文件：默认 index.html，?entry= 指定相对路径。
- * 规范化后必须在项目目录内；扩展名必须在白名单内；必须是文件。
+ * 安全解析目录内文件：规范化后必须在 rootDir 内；扩展名必须在白名单内；必须是文件。
  * 不在白名单/不存在/越界 → 抛 ApiError（404）。
  */
-export function resolvePlayFile(
-  uploadsDir: string,
-  projectId: string,
-  entry: unknown,
-): ResolvedPlayFile {
-  const dir = projectDir(uploadsDir, projectId);
-  const root = path.resolve(dir);
+export function resolveDirFile(rootDir: string, entry: unknown): ResolvedPlayFile {
+  const root = path.resolve(rootDir);
   const rawEntry =
     typeof entry === 'string' && entry.trim() !== '' ? entry.trim().replace(/\\/g, '/') : 'index.html';
   assertSafeRelativePath(rawEntry);
@@ -292,6 +295,17 @@ export function resolvePlayFile(
     throw ApiError.notFound('文件不存在');
   }
   return { absPath, relativeName: rawEntry };
+}
+
+/**
+ * 安全解析试玩/回放文件：默认 index.html，?entry= 指定相对路径（委托 resolveDirFile）。
+ */
+export function resolvePlayFile(
+  uploadsDir: string,
+  projectId: string,
+  entry: unknown,
+): ResolvedPlayFile {
+  return resolveDirFile(projectDir(uploadsDir, projectId), entry);
 }
 
 /** 项目目录 → zip 流（下载：GET /api/projects/:id/download） */

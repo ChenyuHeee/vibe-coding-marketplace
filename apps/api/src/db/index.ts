@@ -26,11 +26,13 @@ export function migrate(db: Db): void {
 /**
  * 幂等补列：老库（CREATE TABLE IF NOT EXISTS 不会加新列）启动时补齐缺失列。
  * 只增列、不动已有列；ALTER TABLE ADD COLUMN 在 SQLite 不支持 IF NOT EXISTS，
- * 故先查 PRAGMA table_info 再补。
+ * 故先查 PRAGMA table_info 再补。值为完整列定义（与 schema.ts 保持一致）。
  */
 const COLUMN_MIGRATIONS: Record<string, string[]> = {
-  projects: ['submitted_at', 'reviewed_at', 'delisted_at'],
-  orders: ['delivered_at', 'cancelled_at'],
+  projects: ['submitted_at TEXT', 'reviewed_at TEXT', 'delisted_at TEXT'],
+  orders: ['delivered_at TEXT', 'cancelled_at TEXT'],
+  contracts: ['accepted_at TEXT', 'paid_at TEXT'],
+  milestones: ['is_final INTEGER NOT NULL DEFAULT 0', 'feedback TEXT', "entry_file TEXT NOT NULL DEFAULT 'index.html'"],
 };
 
 function migrateMissingColumns(db: Db): void {
@@ -39,9 +41,9 @@ function migrateMissingColumns(db: Db): void {
       (db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[]).map((c) => c.name),
     );
     for (const col of columns) {
-      if (existing.has(col)) continue;
-      // 与 schema.ts 中的列定义保持一致（TEXT，可空）
-      db.exec(`ALTER TABLE ${table} ADD COLUMN ${col} TEXT`);
+      const name = col.split(' ')[0];
+      if (existing.has(name)) continue;
+      db.exec(`ALTER TABLE ${table} ADD COLUMN ${col}`);
     }
   }
 }
