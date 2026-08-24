@@ -33,6 +33,7 @@ const DETAIL: ProjectDetail = {
   reviews: [{ id: 'r1', rating: 5, comment: '好玩', user: { id: 'u9', displayName: '小红' }, createdAt: '2026-08-01T00:00:00Z' }],
   isPurchased: false,
   canDownload: false,
+  existingOrder: null,
 };
 
 function jsonResponse(body: unknown, status = 200) {

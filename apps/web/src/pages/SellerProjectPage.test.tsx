@@ -85,6 +85,7 @@ function makeDetail(overrides: Partial<ProjectDetail> = {}): ProjectDetail {
     reviews: [],
     isPurchased: false,
     canDownload: true,
+    existingOrder: null,
     ...overrides,
   };
 }

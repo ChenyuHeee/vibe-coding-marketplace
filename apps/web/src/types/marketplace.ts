@@ -60,6 +60,32 @@ export interface ProjectDetail extends ProjectSummary {
   isPurchased: boolean;
   /** 当前登录用户是否可下载（已购 / 作者） */
   canDownload: boolean;
+  /** 当前用户的未完成订单（待支付/已支付/已交付）；无则 null。购买区据此展示正确动作 */
+  existingOrder: { id: string; status: OrderStatus; escrowStatus: EscrowStatus } | null;
+}
+
+/** 订单条目（API.md §4 GET /api/orders） */
+export interface OrderItem {
+  id: string;
+  orderNo: string;
+  project: {
+    id: string;
+    title: string;
+    coverUrl: string | null;
+    playUrl: string | null;
+    status: ProjectReviewStatus;
+  };
+  priceCr: Cr;
+  feeCr: Cr;
+  totalCr: Cr;
+  status: OrderStatus;
+  escrowStatus: EscrowStatus;
+  createdAt: string;
+  paidAt: string | null;
+  deliveredAt: string | null;
+  completedAt: string | null;
+  refundedAt: string | null;
+  cancelledAt: string | null;
 }
 
 /** 分类列表（API.md §2 GET /api/categories） */

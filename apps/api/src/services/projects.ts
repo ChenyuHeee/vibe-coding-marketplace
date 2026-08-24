@@ -11,6 +11,7 @@ import {
   PROJECT_CATEGORIES,
   type AdminProjectItem,
   type Cr,
+  type EscrowStatus,
   type OrderStatus,
   type Paginated,
   type ProjectCategory,
@@ -245,6 +246,19 @@ export function getProjectDetail(
     created_at: string;
   }[];
   const purchased = user ? hasPurchased(db, user.id, projectId) : false;
+  // 未完成订单（待支付/已支付/已交付）：供详情页购买区展示正确动作（继续支付/查看订单），
+  // 避免用户重复下单撞 409 后不知所措（订单恢复路径）。
+  const existingOrder = user
+    ? (db
+        .prepare(
+          `SELECT id, status, escrow_status FROM orders
+           WHERE buyer_id = ? AND project_id = ? AND status IN ('pending payment','paid','delivered')
+           ORDER BY created_at DESC LIMIT 1`,
+        )
+        .get(user.id, projectId) as
+        | { id: string; status: OrderStatus; escrow_status: EscrowStatus }
+        | undefined) ?? null
+    : null;
   return {
     ...toProjectListItem(project),
     description: project.description,
@@ -252,6 +266,9 @@ export function getProjectDetail(
     isPurchased: purchased,
     canDownload: canDownloadProject(db, project, user),
     reviewNote: project.review_note,
+    existingOrder: existingOrder
+      ? { id: existingOrder.id, status: existingOrder.status, escrowStatus: existingOrder.escrow_status }
+      : null,
   };
 }
 

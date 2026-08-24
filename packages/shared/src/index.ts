@@ -268,6 +268,8 @@ export interface ProjectDetail extends ProjectListItem {
   isPurchased: boolean;
   canDownload: boolean;
   reviewNote: string | null;
+  /** 当前用户的未完成订单（待支付/已支付/已交付）；无则 null。供购买区展示正确动作 */
+  existingOrder: { id: string; status: OrderStatus; escrowStatus: EscrowStatus } | null;
 }
 
 /** 审核进度（GET /api/projects/:id/review） */
