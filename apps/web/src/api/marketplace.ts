@@ -12,6 +12,7 @@ import type { Cr } from '@vibe/shared';
 import type {
   CategoriesResponse,
   Order,
+  OrderItem,
   PayResult,
   ProjectDetail,
   ProjectListQuery,
@@ -81,6 +82,23 @@ export const orderApi = {
 
   /** POST /api/orders/:id/pay —— 模拟支付（扣余额 → 托管） */
   pay: (orderId: string) => api.post<PayResult>(`/orders/${orderId}/pay`),
+
+  /** GET /api/orders?role=buyer —— 我的订单（含未完成订单，供 Library「我的订单」区） */
+  list: (opts?: { status?: string; page?: number; pageSize?: number }) => {
+    const params = new URLSearchParams({ role: 'buyer' });
+    if (opts?.status) params.set('status', opts.status);
+    if (opts?.page) params.set('page', String(opts.page));
+    if (opts?.pageSize) params.set('pageSize', String(opts.pageSize));
+    return api.get<{ items: OrderItem[]; page: number; pageSize: number; total: number }>(
+      `/orders?${params.toString()}`,
+    );
+  },
+
+  /** POST /api/orders/:id/cancel —— 取消未付款订单（一步完成，不追问原因，PRD §4） */
+  cancel: (orderId: string) => api.post<{ order: Order }>(`/orders/${orderId}/cancel`),
+
+  /** POST /api/orders/:id/confirm —— 确认收货（放款给卖家，escrow released） */
+  confirm: (orderId: string) => api.post<{ order: Order }>(`/orders/${orderId}/confirm`),
 };
 
 export const reportApi = {

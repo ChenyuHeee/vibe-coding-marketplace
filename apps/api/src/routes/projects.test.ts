@@ -424,6 +424,29 @@ describe('市场（GET /api/projects 等）', () => {
     const res = await authed(app, buyerToken).get('/api/projects/proj_snake');
     expect(res.body.isPurchased).toBe(true);
     expect(res.body.canDownload).toBe(true);
+    // 种子数据 buyer 对 proj_snake 有一笔 paid 订单 → existingOrder 应返回它
+    expect(res.body.existingOrder).toEqual({ id: 'ord_demo_1', status: 'paid', escrowStatus: 'held' });
+  });
+
+  it('存在待支付订单时详情返回 existingOrder（订单恢复路径）', async () => {
+    const app = testApp();
+    // 注册新买家并下未付款订单
+    const reg = await request(app).post('/api/auth/register').send({
+      email: 'order-recovery@vibes.local',
+      password: 'demo1234',
+      displayName: '订单恢复测试',
+      roles: ['buyer'],
+    });
+    const token = reg.body.token as string;
+    await authed(app, token).post('/api/orders').send({ projectId: 'proj_breakout' });
+    const res = await authed(app, token).get('/api/projects/proj_breakout');
+    expect(res.body.isPurchased).toBe(false);
+    expect(res.body.existingOrder).not.toBeNull();
+    expect(res.body.existingOrder.status).toBe('pending payment');
+    expect(res.body.existingOrder.escrowStatus).toBe('none');
+    // 匿名不返回
+    const anon = await request(app).get('/api/projects/proj_breakout');
+    expect(anon.body.existingOrder).toBeNull();
   });
 
   it('GET /api/categories → 六个分类', async () => {

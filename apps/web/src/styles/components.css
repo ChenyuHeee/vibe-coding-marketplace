@@ -3284,3 +3284,106 @@
   flex: 1;
   min-width: 200px;
 }
+
+/* ==========================================================================
+   Library「我的订单」区 + 详情页待支付订单面板（订单恢复路径）
+   全部使用设计系统 token（DESIGN_SYSTEM §2），无硬编码色值。
+   ========================================================================== */
+
+/* ---- Library 我的订单（进行中）---- */
+.library-orders {
+  margin: 0 0 24px;
+}
+
+.library-orders__list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.library-order-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-separator);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.library-order-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.library-order-card__title {
+  margin: 0;
+}
+
+.library-order-card__meta {
+  margin: 0;
+}
+
+.library-order-card__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-top: var(--space-1);
+}
+
+.library-order-card__preview {
+  margin: var(--space-3) 0;
+}
+
+.library-order-card__preview-check {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: var(--space-3) 0;
+  font-size: 14px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.library-order-card__preview-check input {
+  margin-top: 3px;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-brand);
+}
+
+/* ---- 详情页待支付订单面板 ---- */
+.purchase-panel__pending {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  background: var(--color-warning-subtle);
+  border: 1px solid var(--color-warning);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+.purchase-panel__pending > svg {
+  color: var(--color-warning);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.purchase-panel__pending p {
+  margin: 0 0 var(--space-1);
+}
+
+.purchase-panel__pending-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}

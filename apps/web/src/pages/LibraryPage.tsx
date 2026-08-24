@@ -12,10 +12,19 @@
  */
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Download, LibraryBig, Play, RotateCcw, ScrollText } from 'lucide-react';
+import {
+  CreditCard,
+  Download,
+  LibraryBig,
+  PackageCheck,
+  Play,
+  RotateCcw,
+  ScrollText,
+} from 'lucide-react';
 import { REFUND_WINDOW_DAYS } from '@vibe/shared';
-import type { LibraryItem } from '../types/marketplace';
+import type { LibraryItem, OrderItem } from '../types/marketplace';
 import { libraryApi } from '../api/library';
+import { orderApi } from '../api/marketplace';
 import { downloadProjectZip } from '../api/download';
 import { StatusBadge } from '../components/StatusBadge';
 import { EmptyState } from '../components/EmptyState';
@@ -45,6 +54,18 @@ export function LibraryPage() {
   const [refundItem, setRefundItem] = useState<LibraryItem | null>(null);
   const [refunding, setRefunding] = useState(false);
 
+  // 我的订单（进行中：待支付/已支付/已交付）—— 订单恢复路径
+  const [orders, setOrders] = useState<OrderItem[]>([]);
+  const [ordersError, setOrdersError] = useState<string | null>(null);
+  const [payItem, setPayItem] = useState<OrderItem | null>(null);
+  const [paying, setPaying] = useState(false);
+  const [confirmItem, setConfirmItem] = useState<OrderItem | null>(null);
+  const [confirmPreviewed, setConfirmPreviewed] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const [refundOrderItem, setRefundOrderItem] = useState<OrderItem | null>(null);
+  const [refundingOrder, setRefundingOrder] = useState(false);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -59,9 +80,26 @@ export function LibraryPage() {
     }
   }, []);
 
+  const loadOrders = useCallback(async () => {
+    setOrdersError(null);
+    try {
+      const res = await orderApi.list();
+      setOrders(res.items);
+    } catch (err) {
+      setOrdersError(err instanceof Error ? err.message : '加载订单失败。');
+      setOrders([]);
+    }
+  }, []);
+
+  const reloadAll = useCallback(() => {
+    void load();
+    void loadOrders();
+  }, [load, loadOrders]);
+
   useEffect(() => {
     void load();
-  }, [load]);
+    void loadOrders();
+  }, [load, loadOrders]);
 
   const openRun = async (item: LibraryItem) => {
     setRunItem(item);
@@ -113,9 +151,154 @@ export function LibraryPage() {
   const accessRevoked = (item: LibraryItem) =>
     item.status === 'refunded' || item.status === 'cancelled';
 
+  // ---- 我的订单动作（订单恢复路径）----
+  const activeOrders = orders.filter((o) =>
+    ['pending payment', 'paid', 'delivered'].includes(o.status),
+  );
+
+  const confirmPayOrder = async () => {
+    if (!payItem) return;
+    setPaying(true);
+    try {
+      await orderApi.pay(payItem.id);
+      showToast(`订单已支付，作品已加入 My Library。`, { tone: 'success' });
+      setPayItem(null);
+      reloadAll();
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : '支付失败，请稍后重试。', { tone: 'warning' });
+    } finally {
+      setPaying(false);
+    }
+  };
+
+  const cancelOrderOneStep = async (orderId: string) => {
+    setCancellingId(orderId);
+    try {
+      await orderApi.cancel(orderId);
+      showToast('订单已取消。', { tone: 'success' });
+      reloadAll();
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : '取消失败，请稍后重试。', { tone: 'warning' });
+    } finally {
+      setCancellingId(null);
+    }
+  };
+
+  const confirmReceipt = async () => {
+    if (!confirmItem || !confirmPreviewed) return;
+    setConfirming(true);
+    try {
+      await orderApi.confirm(confirmItem.id);
+      showToast('已确认收货，款项已放款给卖家。', { tone: 'success' });
+      setConfirmItem(null);
+      reloadAll();
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : '确认失败，请稍后重试。', { tone: 'warning' });
+    } finally {
+      setConfirming(false);
+    }
+  };
+
+  const confirmRefundOrder = async () => {
+    if (!refundOrderItem) return;
+    setRefundingOrder(true);
+    try {
+      const { refundedCr } = await libraryApi.refund(refundOrderItem.id);
+      showToast(`已退款 ${formatCr(refundedCr)}，款项已退回余额。`, { tone: 'success' });
+      setRefundOrderItem(null);
+      reloadAll();
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : '退款申请失败，请稍后重试。', { tone: 'warning' });
+    } finally {
+      setRefundingOrder(false);
+    }
+  };
+
   return (
     <div className="page library-page">
       <h1 className="text-h1 page__title">My Library</h1>
+
+      {/* 我的订单（进行中）—— 订单恢复路径：未付款订单不会消失在 UI 里 */}
+      {ordersError && (
+        <ErrorBanner
+          title="加载订单失败"
+          reason={ordersError}
+          nextStep="点击重试。"
+          actions={[{ label: '重试', onClick: () => void loadOrders() }]}
+        />
+      )}
+      {activeOrders.length > 0 && (
+        <section className="library-orders" aria-label="我的订单" data-testid="library-orders">
+          <h2 className="text-h2">我的订单（进行中）</h2>
+          <ul className="library-orders__list">
+            {activeOrders.map((o) => (
+              <li key={o.id} className="library-order-card" data-testid="library-order-item">
+                <div className="library-order-card__head">
+                  <h3 className="library-order-card__title text-h3">
+                    <Link to={`/project/${o.project.id}`}>{o.project.title}</Link>
+                  </h3>
+                  <StatusBadge status={o.status} />
+                </div>
+                <p className="library-order-card__meta text-caption text-tertiary">
+                  单号 {o.orderNo} · 合计 <span className="num">{formatCr(o.totalCr)}</span>（含手续费{' '}
+                  <span className="num">{formatCr(o.feeCr)}</span>）
+                  {o.status === 'pending payment' && ' · 待支付订单可取消'}
+                </p>
+                <div className="library-order-card__actions">
+                  {o.status === 'pending payment' && (
+                    <>
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={() => setPayItem(o)}
+                        disabled={cancellingId === o.id}
+                      >
+                        <CreditCard size={16} aria-hidden="true" />
+                        去支付
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => void cancelOrderOneStep(o.id)}
+                        disabled={cancellingId === o.id}
+                      >
+                        <RotateCcw size={16} aria-hidden="true" />
+                        取消订单
+                      </button>
+                    </>
+                  )}
+                  {(o.status === 'paid' || o.status === 'delivered') && (
+                    <>
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={() => {
+                          setConfirmItem(o);
+                          setConfirmPreviewed(false);
+                        }}
+                      >
+                        <PackageCheck size={16} aria-hidden="true" />
+                        确认收货
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => setRefundOrderItem(o)}
+                      >
+                        <RotateCcw size={16} aria-hidden="true" />
+                        申请退款
+                      </button>
+                    </>
+                  )}
+                  <Link to={`/project/${o.project.id}`} className="btn btn-ghost btn-sm">
+                    作品详情
+                  </Link>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {loading ? (
         <div className="library-list" aria-busy="true" data-testid="library-loading">
@@ -343,6 +526,104 @@ export function LibraryPage() {
         onCancel={() => setRefundItem(null)}
         confirmDisabled={refunding}
         disabledReason={refunding ? '正在提交退款申请…' : undefined}
+      />
+
+      {/* 待支付订单：去支付二次确认（§5.2 高风险动作） */}
+      <ConfirmDialog
+        open={payItem !== null}
+        title="确认支付"
+        consequences={
+          payItem ? (
+            <div data-testid="order-pay-confirm">
+              <p className="text-body-sm">
+                将支付 <strong className="num">{formatCr(payItem.totalCr)}</strong> 完成订单《
+                {payItem.project.title}》（单号 {payItem.orderNo}）。
+              </p>
+              <p className="text-body-sm">
+                支付后资金进入平台托管，确认收货后放款给卖家；{REFUND_WINDOW_DAYS} 天内可申请退款。
+              </p>
+            </div>
+          ) : null
+        }
+        confirmLabel={`确认支付 ${payItem ? formatCr(payItem.totalCr) : ''}`}
+        confirmTone="brand"
+        onConfirm={() => void confirmPayOrder()}
+        onCancel={() => setPayItem(null)}
+        confirmDisabled={paying}
+        disabledReason={paying ? '正在支付…' : undefined}
+      />
+
+      {/* 确认收货并放款：先看交付物再放款（PRD §4 高风险动作硬性） */}
+      <ConfirmDialog
+        open={confirmItem !== null}
+        title="确认收货并放款"
+        consequences={
+          confirmItem ? (
+            <div data-testid="order-confirm-receipt">
+              <p className="text-body-sm">
+                订单《{confirmItem.project.title}》实付{' '}
+                <strong className="num">{formatCr(confirmItem.totalCr)}</strong>（含托管中的手续费{' '}
+                <span className="num">{formatCr(confirmItem.feeCr)}</span>）。
+              </p>
+              <p className="text-body-sm">
+                请先查看交付物（在线试玩），确认作品可以正常使用：
+              </p>
+              <div className="library-order-card__preview">
+                <PlayFrame
+                  playUrl={confirmItem.project.playUrl ?? ''}
+                  title={confirmItem.project.title}
+                />
+              </div>
+              <label className="library-order-card__preview-check">
+                <input
+                  type="checkbox"
+                  checked={confirmPreviewed}
+                  onChange={(e) => setConfirmPreviewed(e.target.checked)}
+                />
+                <span>我已查看交付物，确认放款给卖家</span>
+              </label>
+              <p className="text-body-sm text-warning">
+                确认后托管资金将放款给卖家，<strong>此操作不可撤回</strong>。
+              </p>
+            </div>
+          ) : null
+        }
+        confirmLabel="确认收货并放款"
+        confirmTone="danger"
+        onConfirm={() => void confirmReceipt()}
+        onCancel={() => setConfirmItem(null)}
+        confirmDisabled={!confirmPreviewed || confirming}
+        disabledReason={
+          confirming ? '正在放款…' : '请先查看交付物并勾选确认（未预览不可放款）'
+        }
+      />
+
+      {/* 订单退款二次确认（14 天窗口，路径常驻可被找到） */}
+      <ConfirmDialog
+        open={refundOrderItem !== null}
+        title="申请退款"
+        consequences={
+          refundOrderItem ? (
+            <div data-testid="order-refund-confirm">
+              <p className="text-body-sm">
+                将退还订单《{refundOrderItem.project.title}》实付{' '}
+                <strong className="num">{formatCr(refundOrderItem.totalCr)}</strong> 到平台余额。
+              </p>
+              <p className="text-body-sm">
+                退款政策：购买后 {REFUND_WINDOW_DAYS} 天内可申请，款项退回余额（即时到账）。
+              </p>
+              <p className="text-body-sm text-warning">
+                退款成功后该作品的访问权限将收回，此操作不可撤回。
+              </p>
+            </div>
+          ) : null
+        }
+        confirmLabel="确认退款"
+        confirmTone="danger"
+        onConfirm={() => void confirmRefundOrder()}
+        onCancel={() => setRefundOrderItem(null)}
+        confirmDisabled={refundingOrder}
+        disabledReason={refundingOrder ? '正在提交退款申请…' : undefined}
       />
     </div>
   );

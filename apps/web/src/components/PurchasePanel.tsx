@@ -13,7 +13,7 @@
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { CheckCircle2, CreditCard, LogIn, PackageOpen } from 'lucide-react';
+import { AlertCircle, CheckCircle2, CreditCard, LogIn, PackageOpen } from 'lucide-react';
 import type { Cr } from '@vibe/shared';
 import type { Order, ProjectDetail, Quote } from '../types/marketplace';
 import type { User } from '../types';
@@ -44,6 +44,10 @@ export function PurchasePanel({ project, user }: PurchasePanelProps) {
   const [order, setOrder] = useState<Order | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  // 待支付订单恢复路径（去支付 / 一步取消 / 查看订单）
+  const [pendingPayOpen, setPendingPayOpen] = useState(false);
+  const [pendingBusy, setPendingBusy] = useState(false);
+  const [pendingError, setPendingError] = useState<string | null>(null);
 
   const loadQuote = useCallback(async () => {
     setQuoteLoading(true);
@@ -187,6 +191,124 @@ export function PurchasePanel({ project, user }: PurchasePanelProps) {
       setPhase('created');
     }
   };
+
+  // ---- 已有未完成订单（待支付）：订单恢复路径（去支付 / 一步取消 / 查看订单）----
+  const activeOrder = project.existingOrder;
+
+  const confirmPendingPay = async () => {
+    if (!activeOrder) return;
+    setPendingPayOpen(false);
+    setPendingBusy(true);
+    setPendingError(null);
+    try {
+      const { order: paid } = await orderApi.pay(activeOrder.id);
+      setOrder(paid);
+      setPhase('paid');
+    } catch (err) {
+      setPendingError(err instanceof Error ? err.message : '支付失败，请稍后重试。');
+    } finally {
+      setPendingBusy(false);
+    }
+  };
+
+  const cancelPendingOrder = async () => {
+    if (!activeOrder) return;
+    setPendingBusy(true);
+    setPendingError(null);
+    try {
+      await orderApi.cancel(activeOrder.id);
+      // 一步取消（PRD §4：不追问原因）；刷新后详情重新拉取，恢复购买按钮
+      window.location.reload();
+    } catch (err) {
+      setPendingError(err instanceof Error ? err.message : '取消失败，请稍后重试。');
+      setPendingBusy(false);
+    }
+  };
+
+  // ---- 已有待支付订单：展示「去支付/取消/查看订单」，不再显示购买按钮 ----
+  if (activeOrder && activeOrder.status === 'pending payment') {
+    return (
+      <section className="purchase-panel" aria-label="购买区" data-testid="purchase-pending-order">
+        <div className="purchase-panel__pending">
+          <AlertCircle size={20} aria-hidden="true" />
+          <div>
+            <p className="text-body">
+              <strong>你有一笔待支付订单</strong>
+              <span className="text-caption text-tertiary">（单号 {activeOrder.id.slice(0, 8)}…，{formatCr(paidTotal)}）</span>
+            </p>
+            <p className="text-body-sm text-secondary">完成支付后作品将加入 My Library；也可取消订单后重新下单。</p>
+          </div>
+        </div>
+
+        {pendingError && (
+          <ErrorBanner
+            title="操作未完成"
+            reason={pendingError}
+            nextStep="可稍后重试，或在 My Library 查看订单状态。"
+            actions={[{ label: '去 My Library 查看订单', onClick: () => navigate('/library') }]}
+          />
+        )}
+
+        <div className="purchase-panel__pending-actions">
+          <button
+            type="button"
+            className="btn btn-primary btn-sm"
+            onClick={() => setPendingPayOpen(true)}
+            disabled={pendingBusy}
+          >
+            <CreditCard size={16} aria-hidden="true" />
+            {pendingBusy ? '处理中…' : `去支付 ${formatCr(paidTotal)}`}
+          </button>
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={() => void cancelPendingOrder()}
+            disabled={pendingBusy}
+          >
+            取消订单
+          </button>
+          <Link to="/library" className="btn btn-ghost btn-sm">
+            查看订单
+          </Link>
+        </div>
+
+        <ConfirmDialog
+          open={pendingPayOpen}
+          title="确认支付"
+          consequences={
+            <div className="purchase-panel__confirm" data-testid="purchase-confirm">
+              <p className="text-body-sm">
+                将支付 <strong className="num">{formatCr(paidTotal)}</strong> 完成订单《{project.title}》。
+                支付后资金进入平台托管（DESIGN_SYSTEM §5.2 高风险动作）。
+              </p>
+              <dl className="purchase-panel__quote-lines">
+                <div>
+                  <dt>实付总价</dt>
+                  <dd className="num">{formatCr(paidTotal)}</dd>
+                </div>
+                {balanceCr !== null && (
+                  <>
+                    <div>
+                      <dt>当前余额</dt>
+                      <dd className="num">{formatCr(balanceCr)}</dd>
+                    </div>
+                    <div>
+                      <dt>支付后余额</dt>
+                      <dd className="num">{formatCr(Math.max(0, balanceCr - paidTotal))}</dd>
+                    </div>
+                  </>
+                )}
+              </dl>
+            </div>
+          }
+          confirmLabel={`确认支付 ${formatCr(paidTotal)}`}
+          confirmTone="brand"
+          onConfirm={() => void confirmPendingPay()}
+          onCancel={() => setPendingPayOpen(false)}
+        />
+      </section>
+    );
+  }
 
   return (
     <section className="purchase-panel" aria-label="购买区" data-testid="purchase-active">

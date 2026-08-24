@@ -4,7 +4,7 @@ import { Route, Routes } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { LibraryPage } from './LibraryPage';
 import { renderWithProviders } from '../test/renderWithProviders';
-import type { LibraryItem } from '../types/marketplace';
+import type { LibraryItem, OrderItem } from '../types/marketplace';
 
 const ITEM: LibraryItem = {
   project: {
@@ -46,6 +46,10 @@ function mockApi(routes: { match: (u: string) => boolean; method?: string; respo
     const exact = routes.find((r) => r.match(url) && r.method === method);
     const any = routes.find((r) => r.match(url) && r.method === undefined);
     const route = exact ?? any;
+    // 「我的订单」列表请求未显式 mock 时默认返回空（Library 页会拉取订单）
+    if (!route && url.startsWith('/api/orders?')) {
+      return Promise.resolve(jsonResponse({ items: [], page: 1, pageSize: 20, total: 0 }));
+    }
     if (!route) return Promise.reject(new Error(`unmocked: ${method} ${url}`));
     return Promise.resolve(route.respond());
   });
@@ -198,5 +202,129 @@ describe('LibraryPage（区域 3 My Library）', () => {
     // 成功 Toast + 徽章变为已退款
     expect(await screen.findByTestId('toast')).toBeInTheDocument();
     expect(await screen.findByText('已退款')).toBeInTheDocument();
+  });
+
+  // ---- 我的订单（进行中）—— 订单恢复路径 ----
+
+  const PENDING_ORDER: OrderItem = {
+    id: 'o-pending',
+    orderNo: 'VCM202608249999',
+    project: { id: 'p1', title: '贪吃蛇 3D', coverUrl: null, playUrl: '/play/p1', status: 'approved' },
+    priceCr: 9900,
+    feeCr: 495,
+    totalCr: 10395,
+    status: 'pending payment',
+    escrowStatus: 'none',
+    createdAt: '2026-08-24T00:00:00Z',
+    paidAt: null,
+    deliveredAt: null,
+    completedAt: null,
+    refundedAt: null,
+    cancelledAt: null,
+  };
+
+  const PAID_ORDER: OrderItem = {
+    ...PENDING_ORDER,
+    id: 'o-paid',
+    orderNo: 'VCM202608240001',
+    status: 'paid',
+    escrowStatus: 'held',
+    paidAt: '2026-08-24T01:00:00Z',
+  };
+
+  it('我的订单：待支付订单显示 去支付/取消订单，取消一步完成（不追问）', async () => {
+    const fetchMock = mockApi([
+      { match: (u) => u === '/api/library', respond: () => jsonResponse({ items: [] }) },
+      {
+        match: (u) => u.startsWith('/api/orders?'),
+        respond: () => jsonResponse({ items: [PENDING_ORDER], page: 1, pageSize: 20, total: 1 }),
+      },
+      {
+        match: (u) => u === '/api/orders/o-pending/cancel',
+        method: 'POST',
+        respond: () => jsonResponse({ order: { ...PENDING_ORDER, status: 'cancelled' } }),
+      },
+    ]);
+    renderLibrary();
+    const section = await screen.findByTestId('library-orders');
+    expect(within(section).getByText('我的订单（进行中）')).toBeInTheDocument();
+    expect(within(section).getByRole('button', { name: /去支付/ })).toBeInTheDocument();
+
+    await userEvent.click(within(section).getByRole('button', { name: /取消订单/ }));
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/orders/o-pending/cancel',
+        expect.objectContaining({ method: 'POST' }),
+      );
+    });
+    expect(await screen.findByTestId('toast')).toBeInTheDocument();
+  });
+
+  it('我的订单：去支付 → 二次确认弹窗（总价）→ POST pay', async () => {
+    const fetchMock = mockApi([
+      { match: (u) => u === '/api/library', respond: () => jsonResponse({ items: [] }) },
+      {
+        match: (u) => u.startsWith('/api/orders?'),
+        respond: () => jsonResponse({ items: [PENDING_ORDER], page: 1, pageSize: 20, total: 1 }),
+      },
+      {
+        match: (u) => u === '/api/orders/o-pending/pay',
+        method: 'POST',
+        respond: () =>
+          jsonResponse({ order: { ...PENDING_ORDER, status: 'paid', escrowStatus: 'held' }, balanceAfterCr: 5000 }),
+      },
+    ]);
+    renderLibrary();
+    const section = await screen.findByTestId('library-orders');
+    await userEvent.click(within(section).getByRole('button', { name: /去支付/ }));
+    const dialog = await screen.findByTestId('order-pay-confirm');
+    expect(within(dialog).getByText(/10395 CR/)).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /确认支付/ }));
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/orders/o-pending/pay',
+        expect.objectContaining({ method: 'POST' }),
+      );
+    });
+    expect(await screen.findByTestId('toast')).toBeInTheDocument();
+  });
+
+  it('我的订单：确认收货必须先查看交付物（未勾选禁用 + 附说明，PRD §4）', async () => {
+    const fetchMock = mockApi([
+      { match: (u) => u === '/api/library', respond: () => jsonResponse({ items: [] }) },
+      {
+        match: (u) => u.startsWith('/api/orders?'),
+        respond: () => jsonResponse({ items: [PAID_ORDER], page: 1, pageSize: 20, total: 1 }),
+      },
+      {
+        match: (u) => u === '/api/orders/o-paid/confirm',
+        method: 'POST',
+        respond: () =>
+          jsonResponse({ order: { ...PAID_ORDER, status: 'completed', escrowStatus: 'released' } }),
+      },
+    ]);
+    renderLibrary();
+    const section = await screen.findByTestId('library-orders');
+    await userEvent.click(within(section).getByRole('button', { name: /确认收货/ }));
+
+    const receipt = await screen.findByTestId('order-confirm-receipt');
+    const confirmBtn = screen.getByRole('button', { name: '确认收货并放款' });
+    // 未查看交付物 → 禁用且附说明（禁用 ≠ 看不见）
+    expect(confirmBtn).toBeDisabled();
+    expect(screen.getByText(/未预览不可放款/)).toBeInTheDocument();
+    expect(within(receipt).getByTestId('playframe-iframe')).toBeInTheDocument();
+
+    // 勾选「我已查看交付物」→ 放款可用
+    await userEvent.click(within(receipt).getByRole('checkbox'));
+    expect(confirmBtn).toBeEnabled();
+    await userEvent.click(confirmBtn);
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/orders/o-paid/confirm',
+        expect.objectContaining({ method: 'POST' }),
+      );
+    });
+    expect(await screen.findByTestId('toast')).toBeInTheDocument();
   });
 });
