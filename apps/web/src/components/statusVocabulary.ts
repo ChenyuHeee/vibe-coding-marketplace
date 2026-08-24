@@ -80,6 +80,11 @@ export const STATUS_VOCABULARY: Readonly<Record<string, StatusMeta>> = {
   'buyer acceptance': { label: '买家验收', tone: 'warning', icon: ClipboardCheck },
   payout: { label: '结算', tone: 'success', icon: Coins },
 
+  // ---- 需求板 / 投标 / 里程碑子状态（词汇表 §3 补充；PR-F3-B 本地补充，待 PM 入表）----
+  open: { label: '开放中', tone: 'brand', icon: PlusCircle },
+  withdrawn: { label: '已撤回', tone: 'neutral', icon: Undo2 },
+  'revision requested': { label: '待修改', tone: 'warning', icon: Undo2 },
+
   // ---- 钱包与托管流 §4 ----
   balance: { label: '余额', tone: 'success', icon: Wallet },
   'top-up pending': { label: '充值处理中', tone: 'info', icon: PlusCircle, spinner: true },

@@ -8,7 +8,11 @@ import { Routes, Route } from 'react-router-dom';
 import { AppLayout } from './components/layout/AppLayout';
 import { RequireAuth } from './components/auth/RequireAuth';
 import { HomePage } from './pages/HomePage';
-import { CommissionsPage } from './pages/PlaceholderPages';
+import { CommissionsPage } from './pages/CommissionsPage';
+import { CommissionNewPage } from './pages/CommissionNewPage';
+import { CommissionDetailPage } from './pages/CommissionDetailPage';
+import { ContractsPage } from './pages/ContractsPage';
+import { ContractDetailPage } from './pages/ContractDetailPage';
 import { MarketplacePage } from './pages/MarketplacePage';
 import { ProjectDetailPage } from './pages/ProjectDetailPage';
 import { LibraryPage } from './pages/LibraryPage';
@@ -30,11 +34,36 @@ export default function App() {
         <Route path="/marketplace" element={<MarketplacePage />} />
         <Route path="/project/:id" element={<ProjectDetailPage />} />
         <Route path="/commissions" element={<CommissionsPage />} />
+        <Route path="/commissions/:id" element={<CommissionDetailPage />} />
         <Route path="/design-system" element={<DesignSystemDemoPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 
         {/* 需登录 */}
+        <Route
+          path="/commissions/new"
+          element={
+            <RequireAuth>
+              <CommissionNewPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/contracts"
+          element={
+            <RequireAuth>
+              <ContractsPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/contracts/:id"
+          element={
+            <RequireAuth>
+              <ContractDetailPage />
+            </RequireAuth>
+          }
+        />
         <Route
           path="/library"
           element={

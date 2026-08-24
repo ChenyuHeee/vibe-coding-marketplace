@@ -64,7 +64,7 @@ export function validateProjectFile(file: File | null): PickResult {
  * （`{ error: { code, message } }`；401 清除凭证并广播登出）。
  * 返回 { promise, abort } —— Q2「随时可取消」：取消后 promise 以 ABORTED 拒绝。
  */
-function startUpload<T>(
+export function startUpload<T>(
   path: string,
   formData: FormData,
   onProgress?: (p: UploadProgress) => void,
