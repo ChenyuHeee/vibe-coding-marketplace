@@ -15,8 +15,10 @@
 2. 中文翻译仅用于界面文案与沟通，不进入存储/API 逻辑判断。
 3. 四条状态流互相独立：同一个作品可以同时处于「审核流」的 `approved` 与某笔订单的 `delivered`；同一账号可以同时是买家（订单流）与卖家（审核流）。
 4. **本文档不包含设计系统 5.1 的界面四状态**（Empty / In progress / Error / Success）——那是「界面状态」而非「业务状态」，属设计系统规范（Epic #8）。注意别与需求流业务状态 `in progress` 混淆（见第 3 节）。
-5. 每个状态词在 buyer / seller / contractor 眼中的含义可能不同，但**词本身相同**——这正是 PRD「同一个状态词，三种角色看到的是同一件事的不同侧面」的要求。本文档每个状态给出三角色视角。
-6. 风险语义：涉及钱的状态，必须能回答两个问题——**钱现在在谁手里？何时到我的账户？**（第 4、5 节）。
+5. **同一词可跨流复用，按所属对象区分上下文**：`submitted` 同时是审核流（§1）、投标状态（§3）、里程碑子状态（§3）；`approved` 同时是审核流（§1）与里程碑子状态（§3）；`completed` 同时是订单流（§2）、需求板（§3）、台账（§4）；`cancelled` / `refunded` 同理。同词同义，语境由对象决定（作品 / 投标 / 里程碑 / 订单 / 需求 / 台账），不得在同一对象上混用。
+6. **字段短词与语义长词**：订单/合同上的 `escrowStatus` 字段值用短词（`none` / `held` / `released` / `refunded`），与语义层规范状态（`escrow held` / `escrow released`）一对一映射（见 §4）；展示文案一律用语义长词，不得自创其它词。
+7. 每个状态词在 buyer / seller / contractor 眼中的含义可能不同，但**词本身相同**——这正是 PRD「同一个状态词，三种角色看到的是同一件事的不同侧面」的要求。本文档每个状态给出三角色视角。
+8. 风险语义：涉及钱的状态，必须能回答两个问题——**钱现在在谁手里？何时到我的账户？**（第 4、5 节）。
 
 ---
 
@@ -163,6 +165,67 @@
 >
 > ⚠️ 界面注意：业务状态 `in progress` 与设计系统界面四状态中的「进行中 In progress」**同名不同义**——前者是需求-接单-交付流的业务状态（第 0 节规则 4），渲染时需按上下文区分。
 
+### 需求板状态（Commission Status，需求条目级）
+
+> 需求条目（commission）自身的生命周期状态，与合同级六词（上文）**粒度不同**：一条需求可能已 `completed`，而其下每个合同各自走六词流。
+
+| 状态词 | 中文 | 触发条件 | 流转方向 |
+|---|---|---|---|
+| `open` | 开放中 | 需求发布成功，接受投标中 | → `in progress`（有投标被选中并创建合同）/ `cancelled`（发布者取消） |
+| `in progress` | 进行中 | 选中投标并创建合同后 | → `completed` / `cancelled` / `disputed` |
+| `completed` | 已完成 | 合同 `payout` 结算完成（全部交付验收通过） | 终态 |
+| `cancelled` | 已取消 | 发布者取消（无人接单时）/ 双方协商取消 | 终态；如有托管资金走退款 |
+
+- `open` 开放中
+  - buyer：需求在需求板可见、可被筛选；投标陆续到达，可选中/拒绝。
+  - contractor：可投标（进入投标状态 `submitted`）；已投标可撤回（→ `withdrawn`）。
+  - seller：不适用。
+- `completed` 已完成
+  - buyer：需求完成，验收与结算已结束。
+  - contractor：若中标，已收到 `payout`。
+  - seller：不适用。
+- （`in progress` / `cancelled` 与上文合同级同词复用，三角色视角见上文。）
+
+### 投标状态（Bid Status，投标条目级）
+
+> 单个投标条目自身的状态；注意与合同级 ★ `bid`（六词第一步、流程阶段）**粒度不同**——投标条目状态不替换六词。
+
+| 状态词 | 中文 | 触发条件 | 流转方向 |
+|---|---|---|---|
+| `submitted` | 已提交 | contractor 对 `open` 需求投标成功 | → `selected` / `rejected` / `withdrawn` / `cancelled`（需求取消） |
+| `selected` | 被选中 | buyer 选中该投标 | → 创建合同，合同级进入六词流 |
+| `rejected` | 已拒绝 | buyer 拒绝该投标 / 选中他人 | 终态（对该投标而言） |
+| `withdrawn` | 已撤回 | contractor 主动撤回投标（需求仍 `open` 时） | 终态（可对同一需求重新投标） |
+| `cancelled` | 已取消 | 需求被取消 | 终态 |
+
+- `submitted` 已提交
+  - buyer：投标出现在需求详情，可选中/拒绝。
+  - contractor：我的投标在等待 buyer 处理；可主动撤回（→ `withdrawn`）。
+- `withdrawn` 已撤回
+  - buyer：该投标不可再被选中（从可选中列表移除或标记已撤回）。
+  - contractor：已撤回，不再参与竞标；可对同一需求重新投标。
+- （`selected` / `rejected` / `cancelled` 与上文合同级/辅助词同词复用。）
+
+### 里程碑子状态（Milestone Status，里程碑条目级）
+
+> 单个里程碑条目自身的状态，发生在合同级 ★ `milestone submission` / ★ `buyer acceptance` 阶段内。
+
+| 状态词 | 中文 | 触发条件 | 流转方向 |
+|---|---|---|---|
+| `submitted` | 已提交 | contractor 提交该里程碑交付物 | → `approved` / `revision requested` |
+| `approved` | 已通过 | buyer 验收通过该里程碑 | 终态（该里程碑完成；全部通过后合同级 → `payout`） |
+| `revision requested` | 已要求修改 | buyer 打回该里程碑，**必填修改意见**（feedback） | → `submitted`（contractor 修改后重新提交） |
+
+- `submitted` 已提交
+  - buyer：可查看交付物并验收。
+  - contractor：等待验收结果。
+- `approved` 已通过
+  - buyer：该里程碑完成。
+  - contractor：该里程碑结算就绪（合同级全部完成后 `payout`）。
+- `revision requested` 已要求修改
+  - buyer：已打回并附修改意见（必填，说清哪里不符合验收标准）。
+  - contractor：按修改意见修改后重新提交（→ `submitted`）。
+
 ---
 
 ## 4. 钱包与托管流（Wallet & Escrow Flow）
@@ -187,6 +250,27 @@
 - seller：收款方——作品订单 `completed` 时放款（`escrow released` → `balance`）。
 - contractor：收款方——需求合同 `payout` 时放款（`escrow released` → `balance`）。
 
+### 托管状态维度（Escrow Status，订单/合同 escrowStatus 字段值）
+
+> 订单/合同上的 `escrowStatus` 字段采用**短词**，与语义层规范状态（上文 `escrow held` / `escrow released`）为一对一映射（§0 规则 6）。展示文案一律用语义长词。
+
+| 字段值 | 中文 | 对应语义层状态 | 钱在谁手里 | 何时到我的账户 |
+|---|---|---|---|---|
+| `none` | 无托管 | 未进入托管（待支付 / 已取消等） | 买家自己 / 无资金流动 | 不涉及到账 |
+| `held` | 托管中 | = `escrow held` | 平台托管账户（冻结） | 放款后入收款方 `balance` |
+| `released` | 已放款 | = `escrow released` | 已放款到收款方 `balance` | 即时 |
+| `refunded` | 已退还 | = §2 `refunded`（托管退回） | 已退回买家 | 即时 |
+
+### 台账记录状态（Transaction Status，收支记录条目级）
+
+> 钱包收支记录（transactions）条目自身的状态；涉及钱，同样回答「谁手里 / 何时到账」。
+
+| 状态词 | 中文 | 触发条件 | 钱在谁手里 | 何时到我的账户 |
+|---|---|---|---|---|
+| `pending` | 处理中 | 该笔资金操作已发起、正在处理（充值渠道确认 / 托管放款中） | 视交易类型而定（支付渠道 / 托管处理中） | 处理完成后入账 |
+| `completed` | 已完成 | 资金操作完成 | 已入账（credit）/ 已划出（debit） | 已完成 |
+| `failed` | 失败 | 资金操作失败（充值失败 / 提现退回等） | 未发生流动，退回原账户 | 已退回，可重试 |
+
 > 托管状态在钱包页**一眼可见**：谁的钱、在哪里（托管/余额/银行通道）、何时到账（第 5 节速查表供 UI 直接引用）。
 
 ---
@@ -206,6 +290,11 @@
 | `withdrawal pending` | 银行处理通道 | 1–3 个工作日（页面注明） |
 | `withdrawal completed` | 我的银行卡 | 已完成 |
 | `withdrawal failed` | 退回平台 `balance` | 已退回，可重新提现 |
+| `none`（escrow 无托管） | 买家自己 / 无资金流动 | 不涉及到账 |
+| escrow `refunded` | 已退回买家（同 `refunded`） | 即时 |
+| 台账 `pending` | 支付渠道 / 托管处理中 | 处理完成后入账 |
+| 台账 `completed` | 已入账（credit）/ 已划出（debit） | 已完成 |
+| 台账 `failed` | 未发生流动，退回原账户 | 已退回，可重试 |
 
 ---
 
@@ -215,3 +304,4 @@
 |---|---|---|
 | 2026-02（初始版） | 建立四流全量词汇表 | 与 PRD 第 5 节硬性状态流保持一致；后续变更走 PR 并通知全角色 |
 | 2026-02（修订） | 作品审核流新增 `draft`（草稿） | 与架构师 API 草案 diff 后补齐：`POST /api/projects` 创建后即 `draft`，作者填完再 submit（→ `submitted`） |
+| 2026-02（补全） | 与 `packages/shared/src/index.ts` 全表 diff 补齐缺口 | 需求板 `open`/`completed`；投标 `submitted`/`withdrawn`；里程碑 `submitted`/`approved`/`revision requested`；托管字段维度 `none`/`held`/`released`/`refunded`；台账 `pending`/`completed`/`failed`；§0 增补跨流同词与长短词映射规则 |
