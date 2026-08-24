@@ -13,6 +13,7 @@
   "scripts": {
     "dev": "npm run build -w @vibe/shared && concurrently -k -n api,web -c blue,green \"npm run dev -w @vibe/api\" \"npm run dev -w @vibe/web\"",
     "build": "npm run build -w @vibe/shared && npm run build -w @vibe/api && npm run build -w @vibe/web",
+    "seed": "npm run seed -w @vibe/api",
     "test": "npm run build -w @vibe/shared && npm run test -ws --if-present",
     "lint": "eslint .",
     "typecheck": "npm run build -w @vibe/shared && npm run typecheck -w @vibe/shared && npm run typecheck -w @vibe/api && npm run typecheck -w @vibe/web"
