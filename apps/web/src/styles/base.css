@@ -356,3 +356,16 @@ button:disabled .btn-icon,
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ---- 屏幕阅读器专用（仅朗读，不占布局） ---- */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
