@@ -336,6 +336,16 @@ button:disabled .btn-icon,
   border: 0;
 }
 
+/* 通用旋转加载图标 */
+.spinner {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* 可访问性：尊重减少动态偏好 */
 @media (prefers-reduced-motion: reduce) {
   *,

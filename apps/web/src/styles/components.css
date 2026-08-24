@@ -877,3 +877,314 @@
   font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
 }
+
+/* --------------------------------------------------------------------------
+   认证页（PR-F2：登录 / 注册）
+   -------------------------------------------------------------------------- */
+.auth-page {
+  max-width: 440px;
+  margin: 0 auto;
+  padding: var(--space-6) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.auth-page__title {
+  margin: 0;
+}
+.auth-page__sub {
+  margin: 0;
+}
+
+.role-select {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.role-select__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.role-select__chip:disabled {
+  cursor: not-allowed;
+  opacity: 1;
+}
+.role-select__primary {
+  color: var(--color-brand);
+  font-weight: 700;
+}
+
+/* --------------------------------------------------------------------------
+   个人中心（角色切换器 D4）
+   -------------------------------------------------------------------------- */
+.profile-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-width: 560px;
+}
+.profile-card__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.profile-card__avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--color-brand-subtle);
+  color: var(--color-brand);
+  overflow: hidden;
+}
+.profile-card__name {
+  margin: 0;
+}
+.profile-card__meta {
+  margin: 2px 0 0;
+}
+.profile-card__roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.role-switch__current {
+  color: var(--color-brand);
+  font-weight: 700;
+}
+.profile-card__role-info {
+  border-left: 3px solid var(--color-brand);
+  background: var(--color-brand-subtle);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.profile-card__role-info p {
+  margin: 0;
+}
+.profile-card__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* --------------------------------------------------------------------------
+   首页（Q1/Q2/Q3 演示 + 角色上下文）
+   -------------------------------------------------------------------------- */
+.home-role-strip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-separator);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-6);
+}
+.home-role-strip__label {
+  font-weight: 600;
+}
+.home-intent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+.home-intent__title {
+  margin: 0;
+}
+
+.task-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin-bottom: var(--space-6);
+}
+.task-panel__header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+.task-panel__header .stepper {
+  flex: 1;
+}
+.task-panel__cancel {
+  flex-shrink: 0;
+}
+.task-panel__output {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-height: 64px;
+}
+.task-panel__block-title {
+  margin: 0 0 var(--space-2);
+  font-weight: 600;
+}
+.task-panel__candidates {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.task-panel__candidate {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--color-separator);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-app);
+}
+.task-panel__preview-frame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+  border: 1px dashed var(--color-separator-opaque);
+  border-radius: var(--radius-md);
+  color: var(--color-text-tertiary);
+  background: var(--color-bg-subtle);
+}
+.task-panel__checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.task-panel__check-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-tertiary);
+  font-size: var(--text-body-sm);
+}
+.task-panel__check-item svg {
+  color: var(--color-text-tertiary);
+}
+.task-panel__check-item--done {
+  color: var(--color-text-primary);
+}
+.task-panel__check-item--done svg {
+  color: var(--color-success);
+}
+
+.success-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+  border-color: var(--color-success-subtle);
+}
+.success-panel__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--color-success-subtle);
+  color: var(--color-success);
+}
+.success-panel p {
+  margin: 0;
+  max-width: 420px;
+}
+.success-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.draft-editor {
+  margin-top: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.draft-editor__textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: var(--space-3);
+  border: 1px solid var(--color-separator-opaque);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
+  font-size: var(--text-body-sm);
+  line-height: var(--text-body-lh);
+  font-family: var(--font-sans);
+  resize: vertical;
+}
+.draft-editor__actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.home-quick-links {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+@media (max-width: 767px) {
+  .home-quick-links {
+    grid-template-columns: 1fr;
+  }
+}
+.home-quick-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  text-align: left;
+  cursor: pointer;
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+}
+.home-quick-link svg {
+  color: var(--color-brand);
+  flex-shrink: 0;
+}
+.home-quick-link span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* 顶栏用户区（登录态） */
+.topnav__user {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+  color: var(--color-text-primary);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+}
+.topnav__user:hover {
+  background: var(--color-bg-subtle);
+}
+.topnav__user-name {
+  font-size: var(--text-body-sm);
+  font-weight: 600;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.topnav__role-badge {
+  font-size: var(--text-caption);
+}
