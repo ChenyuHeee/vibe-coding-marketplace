@@ -8,12 +8,9 @@ import { Routes, Route } from 'react-router-dom';
 import { AppLayout } from './components/layout/AppLayout';
 import { RequireAuth } from './components/auth/RequireAuth';
 import { HomePage } from './pages/HomePage';
-import {
-  CommissionsPage,
-  LibraryPage,
-  MarketplacePage,
-  WalletPage,
-} from './pages/PlaceholderPages';
+import { CommissionsPage, LibraryPage, WalletPage } from './pages/PlaceholderPages';
+import { MarketplacePage } from './pages/MarketplacePage';
+import { ProjectDetailPage } from './pages/ProjectDetailPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
@@ -27,6 +24,7 @@ export default function App() {
         {/* 公开 */}
         <Route index element={<HomePage />} />
         <Route path="/marketplace" element={<MarketplacePage />} />
+        <Route path="/project/:id" element={<ProjectDetailPage />} />
         <Route path="/commissions" element={<CommissionsPage />} />
         <Route path="/design-system" element={<DesignSystemDemoPage />} />
         <Route path="/login" element={<LoginPage />} />
