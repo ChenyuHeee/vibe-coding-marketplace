@@ -21,7 +21,10 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
   }
 
   if (!user) {
-    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+    // 记住来源路径 + query（登录后原样回跳，含筛选参数）
+    return (
+      <Navigate to="/login" state={{ from: location.pathname + location.search }} replace />
+    );
   }
 
   return <>{children}</>;

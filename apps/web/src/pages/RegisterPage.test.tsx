@@ -5,14 +5,16 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { RegisterPage } from './RegisterPage';
 import { renderWithProviders } from '../test/renderWithProviders';
 
+// 与 @vibe/shared SafeUser 一致（后端 getSafeUser 返回 ratingAvg: 0 / isAdmin: false）
 const USER = {
   id: 'u1',
   email: 'a@b.c',
   displayName: '小明',
   roles: ['buyer', 'seller'],
   avatarUrl: null,
-  ratingAvg: null,
+  ratingAvg: 0,
   ratingCount: 0,
+  isAdmin: false,
 };
 
 function jsonResponse(body: unknown, status = 200) {

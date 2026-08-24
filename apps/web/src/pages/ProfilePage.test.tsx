@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ProfilePage } from './ProfilePage';
 import { renderWithProviders } from '../test/renderWithProviders';
 
+// 与 @vibe/shared SafeUser 一致
 const USER = {
   id: 'u1',
   email: 'a@b.c',
@@ -13,6 +14,7 @@ const USER = {
   avatarUrl: null,
   ratingAvg: 4.7,
   ratingCount: 12,
+  isAdmin: false,
 };
 
 function jsonResponse(body: unknown, status = 200) {
