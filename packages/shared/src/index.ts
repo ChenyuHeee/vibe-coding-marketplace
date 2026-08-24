@@ -406,3 +406,74 @@ export interface MyBidItem {
   status: BidStatus;
   createdAt: string;
 }
+
+// ---------------------------------------------------------------------------
+// 接单交付 DTO（API.md §6，字段按 D2 用 *Cr；合同级状态 = 词汇表 §3 六词）
+// ---------------------------------------------------------------------------
+
+/** 合同双方/买家/接单者公开信息（不含联系方式） */
+export interface ContractParty {
+  id: string;
+  displayName: string;
+}
+
+/** 里程碑条目（随合同详情返回 / GET /api/milestones/:id） */
+export interface ContractMilestoneItem {
+  id: string;
+  seq: number;
+  title: string;
+  description: string;
+  /** 交付物回放地址（/api/milestones/:id/files/*），未提交时为 null */
+  deliverableUrl: string | null;
+  isFinal: boolean;
+  status: MilestoneStatus;
+  /** request-revision 的修改意见（buyer 必填） */
+  feedback: string | null;
+  submittedAt: string | null;
+  approvedAt: string | null;
+}
+
+/** 合同条目（GET /api/contracts 列表 / GET /api/contracts/:id 详情） */
+export interface ContractItem {
+  id: string;
+  commission: { id: string; title: string; status: CommissionStatus };
+  buyer: ContractParty;
+  contractor: ContractParty;
+  bidId: string;
+  agreedAmountCr: Cr;
+  /** 合同级六词（词汇表 §3 ★）：bid/selected/in progress/milestone submission/buyer acceptance/payout */
+  status: ContractStatus;
+  escrowStatus: EscrowStatus;
+  acceptedAt: string | null;
+  paidAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** 合同详情（GET /api/contracts/:id；买卖双方看到同一 status 词） */
+export interface ContractDetail extends ContractItem {
+  milestones: ContractMilestoneItem[];
+}
+
+// ---------------------------------------------------------------------------
+// 卖家工作台（Issue #30，GET /api/seller/projects —— 作者视角全部状态）
+// ---------------------------------------------------------------------------
+
+/** 卖家「我的作品」条目（含审核进度信息，前端审核进度页需要） */
+export interface SellerProjectItem {
+  id: string;
+  title: string;
+  status: ProjectReviewStatus;
+  category: ProjectCategory;
+  coverUrl: string | null;
+  priceCr: Cr;
+  trialScope: string;
+  reviewNote: string | null;
+  submittedAt: string | null;
+  reviewedAt: string | null;
+  publishedAt: string | null;
+  delistedAt: string | null;
+  reviewHistory: ReviewEventItem[];
+  createdAt: string;
+  updatedAt: string;
+}

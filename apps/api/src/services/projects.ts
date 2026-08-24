@@ -20,6 +20,7 @@ import {
   type ProjectReviewStatus,
   type ReviewEventItem,
   type ReviewItem,
+  type SellerProjectItem,
 } from '@vibe/shared';
 import type { Db } from '../db';
 import { ApiError } from '../lib/errors';
@@ -628,4 +629,53 @@ export function addReview(
     created_at: string;
   };
   return toReviewItem(row);
+}
+
+// ---------------------------------------------------------------------------
+// 卖家工作台（Issue #30）：GET /api/seller/projects —— 作者视角全部状态 + 审核进度
+// ---------------------------------------------------------------------------
+
+/**
+ * 卖家「我的作品」列表：全部状态（draft/submitted/under review/approved/rejected/delisted，
+ * 词汇表 §1），含审核进度（reviewNote + reviewHistory）供前端审核进度页使用。
+ */
+export function listSellerProjects(
+  db: Db,
+  sellerId: string,
+  opts: { page?: number; pageSize?: number },
+): Paginated<SellerProjectItem> {
+  const page = Math.max(1, Number(opts.page) || 1);
+  const pageSize = Math.min(100, Math.max(1, Number(opts.pageSize) || 20));
+  const total = (
+    db.prepare('SELECT COUNT(*) AS c FROM projects WHERE seller_id = ?').get(sellerId) as { c: number }
+  ).c;
+  const rows = db
+    .prepare(
+      `SELECT p.*, u.email AS seller_email, u.display_name AS seller_display_name, u.rating_avg AS seller_rating_avg
+       FROM projects p JOIN users u ON u.id = p.seller_id
+       WHERE p.seller_id = ? ORDER BY p.created_at DESC, p.rowid DESC LIMIT ? OFFSET ?`,
+    )
+    .all(sellerId, pageSize, (page - 1) * pageSize) as ProjectWithSellerRow[];
+  return {
+    items: rows.map((r) => ({
+      id: r.id,
+      title: r.title,
+      status: r.status,
+      category: r.category as ProjectCategory,
+      coverUrl: r.cover_url,
+      priceCr: r.price_cr,
+      trialScope: r.trial_scope,
+      reviewNote: r.review_note,
+      submittedAt: r.submitted_at,
+      reviewedAt: r.reviewed_at,
+      publishedAt: r.published_at,
+      delistedAt: r.delisted_at,
+      reviewHistory: listEvents(db, r.id),
+      createdAt: r.created_at,
+      updatedAt: r.updated_at,
+    })),
+    page,
+    pageSize,
+    total,
+  };
 }

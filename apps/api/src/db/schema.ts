@@ -180,6 +180,8 @@ CREATE TABLE IF NOT EXISTS contracts (
   agreed_amount_cr INTEGER NOT NULL,
   status           TEXT NOT NULL DEFAULT 'bid',
   escrow_status    TEXT NOT NULL DEFAULT 'none',
+  accepted_at      TEXT,
+  paid_at          TEXT,
   created_at       TEXT NOT NULL,
   updated_at       TEXT NOT NULL
 );
@@ -188,7 +190,8 @@ CREATE INDEX IF NOT EXISTS idx_contracts_contractor  ON contracts(contractor_id)
 CREATE INDEX IF NOT EXISTS idx_contracts_status      ON contracts(status);
 
 -- ---------------------------------------------------------------------------
--- 3.4 需求线 · milestones
+-- 3.4 需求线 · milestones（is_final：最终里程碑声明，approve 后合同进入 buyer acceptance；
+--     feedback：request-revision 的修改意见（必填））
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS milestones (
   id               TEXT PRIMARY KEY,
@@ -197,6 +200,9 @@ CREATE TABLE IF NOT EXISTS milestones (
   title            TEXT NOT NULL DEFAULT '',
   description      TEXT NOT NULL DEFAULT '',
   deliverable_path TEXT,
+  entry_file       TEXT NOT NULL DEFAULT 'index.html',
+  is_final         INTEGER NOT NULL DEFAULT 0,
+  feedback         TEXT,
   status           TEXT NOT NULL DEFAULT 'submitted',
   submitted_at     TEXT,
   approved_at      TEXT,
