@@ -119,3 +119,42 @@ export interface ProjectListQuery {
 
 /** 分页响应（API.md 约定；与 shared Paginated 同形） */
 export type ProjectListResponse = Paginated<ProjectSummary>;
+
+// ---------------------------------------------------------------------------
+// My Library（API.md §4）
+// ---------------------------------------------------------------------------
+
+/** 已购条目（API.md §4 GET /api/library） */
+export interface LibraryItem {
+  project: {
+    id: string;
+    title: string;
+    coverUrl: string | null;
+    playUrl: string | null;
+    seller: SellerPublic;
+    /** 作品当前审核状态（含 delisted —— 已购保留访问权） */
+    status: ProjectReviewStatus;
+  };
+  orderId: string;
+  orderNo: string;
+  priceCr: Cr;
+  totalCr: Cr;
+  purchasedAt: string;
+  /** 订单状态（pending payment/paid/delivered/completed/refunded…） */
+  status: OrderStatus;
+  escrowStatus: EscrowStatus;
+  /** 是否在退款窗口内（14 天，shared REFUND_WINDOW_DAYS） */
+  refundable: boolean;
+}
+
+/** 在线运行（API.md §4 GET /api/library/:projectId/run） */
+export interface RunResult {
+  playUrl: string;
+}
+
+/** 退款响应（API.md §4 POST /api/orders/:id/refund） */
+export interface RefundResult {
+  order: Order;
+  refundedCr: Cr;
+  balanceAfterCr: Cr;
+}

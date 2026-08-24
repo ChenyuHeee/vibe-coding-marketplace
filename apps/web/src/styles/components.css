@@ -1795,3 +1795,348 @@
   margin: 0;
   white-space: pre-wrap;
 }
+
+/* --------------------------------------------------------------------------
+   LibraryPage（My Library：已购列表 + 运行/下载 + 退款路径常驻）
+   -------------------------------------------------------------------------- */
+.library-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.library-card {
+  display: flex;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-separator);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+.library-card--skeleton {
+  min-height: 120px;
+}
+.library-card__cover {
+  width: 140px;
+  flex-shrink: 0;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-bg-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.library-card__cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.library-card__cover-fallback {
+  color: var(--color-text-tertiary);
+}
+.library-card__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.library-card__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.library-card__title {
+  margin: 0;
+}
+.library-card__title a {
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+.library-card__title a:hover {
+  color: var(--color-brand);
+}
+.library-card__meta {
+  margin: 0;
+}
+.library-card__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-top: var(--space-2);
+}
+.library-card__refund-note {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: var(--space-1) 0 0;
+}
+.link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-brand);
+  font-size: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+  min-height: auto;
+}
+.run-dialog {
+  max-width: 720px;
+}
+.run-dialog__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* --------------------------------------------------------------------------
+   WalletPage（钱包：余额卡 / 充值 / 收支 / 提现 / 托管总览）
+   -------------------------------------------------------------------------- */
+.wallet-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+.wallet-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-separator);
+}
+.wallet-section__sub {
+  margin-top: var(--space-4);
+}
+
+/* ---- WalletBalanceCard（§8 #4） ---- */
+.wallet-balance {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-6);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-separator);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+.wallet-balance__questions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+}
+@media (max-width: 767px) {
+  .wallet-balance__questions {
+    grid-template-columns: 1fr;
+  }
+}
+.wallet-balance__col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.wallet-balance__q {
+  margin: 0 0 var(--space-1);
+  color: var(--color-text-secondary);
+}
+.wallet-balance__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--color-text-primary);
+}
+.wallet-balance__row--eta {
+  color: var(--color-text-secondary);
+}
+.wallet-balance__bottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  border-top: 1px solid var(--color-separator);
+  padding-top: var(--space-4);
+}
+.wallet-balance__balance-label {
+  margin: 0 0 2px;
+}
+.wallet-balance__amount {
+  margin: 0;
+  font-size: var(--text-display);
+  line-height: var(--text-display-lh);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+/* ---- 充值 ---- */
+.wallet-topup__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.wallet-topup__label {
+  margin: 0;
+  font-weight: 600;
+}
+.wallet-topup__input {
+  width: 180px;
+}
+
+/* ---- 收支记录 ---- */
+.wallet-filters {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+.wallet-filters label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+}
+.tx-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-separator);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.tx-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-app);
+}
+.tx-item + .tx-item {
+  border-top: 1px solid var(--color-separator);
+}
+.tx-item__main {
+  min-width: 0;
+}
+.tx-item__type {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.tx-item__dir {
+  font-weight: 400;
+}
+.tx-item__note {
+  margin: 2px 0 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 520px;
+}
+.tx-item__note time {
+  display: block;
+}
+.tx-item__amounts {
+  text-align: right;
+  flex-shrink: 0;
+}
+.tx-item__amount {
+  margin: 0;
+  font-weight: 700;
+}
+.tx-item__amount--credit {
+  color: var(--color-success-text);
+}
+.tx-item__amount--debit {
+  color: var(--color-text-primary);
+}
+.tx-item__balance {
+  margin: 2px 0 0;
+}
+
+/* ---- 提现 ---- */
+.wallet-withdraw__form {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-3);
+  max-width: 720px;
+}
+.wallet-withdraw__form .btn {
+  align-self: end;
+  justify-self: start;
+}
+.wd-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.wd-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-separator);
+  border-radius: var(--radius-md);
+}
+.wd-item__main p {
+  margin: 0;
+}
+
+/* ---- 托管总览 ---- */
+.escrow-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.escrow-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-separator);
+  border-radius: var(--radius-md);
+}
+.escrow-item__main {
+  min-width: 0;
+}
+.escrow-item__main p {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.escrow-item__party {
+  font-weight: 400;
+}
+.escrow-item__eta {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-info-text);
+  flex-shrink: 0;
+  text-align: right;
+}
