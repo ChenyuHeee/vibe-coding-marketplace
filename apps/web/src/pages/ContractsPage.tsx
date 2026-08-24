@@ -7,7 +7,7 @@
  * - 买卖双方看到同一状态词（StatusBadge 查表渲染，PRD 区域 5）。
  */
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ClipboardList, Coins, UserRound } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { StatusBadge } from '../components/StatusBadge';
@@ -32,6 +32,7 @@ const STATUS_OPTIONS: { value: string; label: string }[] = [
 
 export function ContractsPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const role = (searchParams.get('role') as 'buyer' | 'contractor' | null) ?? 'buyer';
@@ -144,7 +145,7 @@ export function ContractsPage() {
               : '去需求板投标，中标后合同会出现在这里。'
           }
           actionLabel={role === 'buyer' ? '发布需求' : '去需求板'}
-          onAction={() => (role === 'buyer' ? (window.location.href = '/commissions/new') : (window.location.href = '/commissions'))}
+          onAction={() => (role === 'buyer' ? navigate('/commissions/new') : navigate('/commissions'))}
         />
       ) : (
         <>

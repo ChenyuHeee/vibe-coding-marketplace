@@ -11,7 +11,7 @@
  *   已投过显示「我的投标」状态徽章）。
  */
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   AlertCircle,
   ArrowLeft,
@@ -21,6 +21,7 @@ import {
   Link2,
   Loader2,
   Lock,
+  LogIn,
   Send,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -31,13 +32,14 @@ import { EmptyState } from '../components/EmptyState';
 import { Skeleton } from '../components/Skeleton';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { commissionApi, contractApi } from '../api/commission';
-import { criteriaLines } from './CommissionNewPage';
+import { criteriaLines } from '../lib/criteria';
 import { formatCr } from '../lib/format';
 import type { CommissionBidItem, CommissionDetail } from '../types/commission';
 
 export function CommissionDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const { showToast } = useToast();
 
@@ -129,7 +131,18 @@ export function CommissionDetailPage() {
       setBidProposal('');
       await load();
     } catch (err) {
-      showToast(err instanceof Error ? err.message : '投标失败', { tone: 'warning' });
+      // 错误三件事：出了什么错（后端 message）+ 为什么 + 下一步怎么办
+      const e = err as { code?: string; message?: string };
+      if (e.code === 'CONFLICT') {
+        // 一人一单一标：刷新后下方展示「我的投标」状态徽章
+        showToast(`${e.message ?? '你已对该需求投过标。'}下一步：可在下方查看我的投标状态。`, {
+          tone: 'warning',
+          action: { label: '查看我的投标', onClick: () => void load() },
+        });
+        await load();
+      } else {
+        showToast(`${e.message ?? '投标失败。'}下一步：稍后重试，或换一个需求投标。`, { tone: 'warning' });
+      }
     } finally {
       setBidding(false);
     }
@@ -236,11 +249,32 @@ export function CommissionDetailPage() {
         </section>
       )}
 
-      {/* 投标区 */}
+      {/* 投标区（未登录：引导登录查看，不渲染空态 —— 后端对匿名返回 bids:[] 但 bidCount 为真实值） */}
       <section className="commission-detail__bids" aria-label="投标列表">
-        <h2 className="text-h2 commission-detail__section-title">投标（{commission.bids.length}）</h2>
+        <h2 className="text-h2 commission-detail__section-title">投标（{commission.bidCount}）</h2>
 
-        {commission.bids.length === 0 ? (
+        {!user ? (
+          <div className="commission-detail__login" role="status">
+            <span className="commission-detail__login-icon" aria-hidden="true">
+              <LogIn size={24} />
+            </span>
+            <div>
+              <p className="text-body">
+                <strong>登录后查看投标列表</strong>
+              </p>
+              <p className="text-body-sm text-secondary">
+                投标信息仅对登录用户可见；登录后可作为接单者投标，或（发布者）查看报价并选中。
+              </p>
+            </div>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => navigate('/login', { state: { from: location.pathname } })}
+            >
+              <LogIn size={16} aria-hidden="true" /> 去登录
+            </button>
+          </div>
+        ) : commission.bids.length === 0 ? (
           <EmptyState
             icon={Gavel}
             tone="info"

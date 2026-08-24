@@ -51,14 +51,6 @@ const EMPTY_DRAFT: PublishDraft = {
   referenceProjectIds: [],
 };
 
-/** 验收标准 → checklist 行（用于锁定展示与后续验收对照） */
-export function criteriaLines(criteria: string): string[] {
-  return criteria
-    .split('\n')
-    .map((l) => l.trim())
-    .filter(Boolean);
-}
-
 export function CommissionNewPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
