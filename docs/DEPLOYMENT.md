@@ -1,36 +1,59 @@
 # 部署拓扑（Dev Deployment）
 
 > 本地服务器 = 生产演示环境。域名：`vibers.hechenyu.xin`（DNS A 记录 → 服务器公网 IP，由用户管理）。
-> 用户决策：开发过程中直接把站点映射到域名（端口方式）。
+> 访问方式：**直接 `https://vibers.hechenyu.xin`（免端口）**，由系统 nginx（80/443，root 管理）反代到本应用。
 
 ## 端口约定（唯一事实）
 
 | 服务 | 绑定 | 端口 | 说明 |
 |------|------|------|------|
-| **Web 入口（Vite dev / 生产静态）** | `0.0.0.0` | **8090** | 对外唯一端口；`vibers.hechenyu.xin:8090` |
-| **API 后端** | `127.0.0.1` | **3001** | 只对本机，不对外 |
+| **Web 入口（Vite dev / 静态产物）** | `127.0.0.1` | **8090** | 只被 nginx 反代访问；本地调试可直接访问 |
+| **API 后端** | `127.0.0.1` | **3001** | 只对本机，不对外；nginx 将 `/api` 与 `/play` 转发至此 |
 | 数据库 | 本地文件 | — | SQLite |
 
-- 对外暴露**只有 8090**：Vite dev server 配置 `server.proxy`：`/api → http://127.0.0.1:3001`（开发）；生产则 nginx/静态服务器 + 同构代理。
-- API 一律**不绑定公网**（127.0.0.1），防绕过。
-- 用户需在云安全组放行 **TCP 8090** 入站。
+- 对外暴露：**只有 nginx 80/443**（由服务器管理员 root 管理，见下）。
+- Web/API 一律绑定 127.0.0.1（不再需要 0.0.0.0），安全组无需放行额外端口。
+
+## nginx vhost（root 操作，一次完成）
+
+配置文件已备好（两份，均已同步到 `/opt/dsh/nginx/`）：
+
+- `deploy/vibers.site.http-only.conf` —— HTTP 引导版（证书前临时用）
+- `deploy/vibers.site.conf` —— HTTPS 完整版（反代 `/` → 8090，`/api`、`/play` → 3001）
+
+以 root 依次执行：
+
+```bash
+# 1) HTTP 引导版上线（vibers.hechenyu.xin 立即可用，HTTP）
+cp /opt/dsh/DSH/Vibers-Land/deploy/vibers.site.http-only.conf /etc/nginx/sites-available/vibers.http
+ln -sf /etc/nginx/sites-available/vibers.http /etc/nginx/sites-enabled/vibers.http
+nginx -t && systemctl reload nginx
+
+# 2) 签发 Let's Encrypt 证书（HTTP-01 验证）
+certbot certonly --webroot -w /var/www/letsencrypt -d vibers.hechenyu.xin --register-unsafely-without-email --agree-tos
+
+# 3) 切换为 HTTPS 完整版
+cp /opt/dsh/DSH/Vibers-Land/deploy/vibers.site.conf /etc/nginx/sites-available/vibers
+ln -sf /etc/nginx/sites-available/vibers /etc/nginx/sites-enabled/vibers
+rm -f /etc/nginx/sites-enabled/vibers.http
+nginx -t && systemctl reload nginx
+```
+
+> 若 `deploy-nginx.sh` 会自动安装 `/opt/dsh/nginx/` 下全部 conf，也可直接运行它（视其实现而定）。
+> 完成后访问：`https://vibers.hechenyu.xin`（HTTPS） / `http://vibers.hechenyu.xin`（会 301 到 HTTPS）。
 
 ## 运行方式
 
 ```bash
-# 开发（两个进程）
-npm run dev            # 并行启动 web(:8090) + api(:3001)
+# 开发（两个进程，均在 127.0.0.1）
+npm run dev            # web(:8090) + api(:3001)
 
-# 生产演示（可选，交付阶段）
-npm run build          # 构建静态产物
-npm run preview        # 或静态服务器 → 8090（含 /api 代理）
+# 生产演示（交付阶段）
+npm run build && npm run preview   # 或静态服务器 → 8090（含 /api 代理）
 ```
 
-## 访问
+## 本地验证
 
-- `http://vibers.hechenyu.xin:8090` （其他设备直接打开；需安全组放行 8090）
-- 本地：`http://127.0.0.1:8090`
-
-## HTTPS 说明（后续可加）
-
-当前为 HTTP + 端口方式。若要免端口 HTTPS（`https://vibers.hechenyu.xin`），需要 root 权限在系统 nginx 加 vhost（参考 `/opt/dsh/nginx/dsh.site.conf` 模式 + certbot），由服务器管理员（用户）操作；我们可提供现成 vhost 片段（见 `deploy/vibers.site.conf.example`）。
+- `curl http://127.0.0.1:8090/`（占位页/应用）
+- `curl http://127.0.0.1:3001/api/health`（API）
+- nginx 链路：`curl -H 'Host: vibers.hechenyu.xin' http://127.0.0.1/ -L`
