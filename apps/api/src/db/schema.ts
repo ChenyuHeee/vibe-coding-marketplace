@@ -57,12 +57,40 @@ CREATE TABLE IF NOT EXISTS projects (
   download_count INTEGER NOT NULL DEFAULT 0,
   play_count     INTEGER NOT NULL DEFAULT 0,
   published_at   TEXT,
+  submitted_at   TEXT,
+  reviewed_at    TEXT,
+  delisted_at    TEXT,
   created_at     TEXT NOT NULL,
   updated_at     TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_projects_status   ON projects(status);
 CREATE INDEX IF NOT EXISTS idx_projects_category ON projects(category);
 CREATE INDEX IF NOT EXISTS idx_projects_seller   ON projects(seller_id);
+
+-- ---------------------------------------------------------------------------
+-- 作品审核事件流水（GET /api/projects/:id/review 的 history；词汇表 §1）
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS project_review_events (
+  id         TEXT PRIMARY KEY,
+  project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE RESTRICT,
+  event      TEXT NOT NULL,
+  note       TEXT,
+  actor_id   TEXT REFERENCES users(id) ON DELETE RESTRICT,
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_project_review_events_project ON project_review_events(project_id, created_at);
+
+-- ---------------------------------------------------------------------------
+-- 举报（PR-B2-A；reports(id, project_id, reporter_id, reason, created_at)）
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS reports (
+  id          TEXT PRIMARY KEY,
+  project_id  TEXT NOT NULL REFERENCES projects(id) ON DELETE RESTRICT,
+  reporter_id TEXT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+  reason      TEXT NOT NULL,
+  created_at  TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_reports_project ON reports(project_id, created_at);
 
 -- ---------------------------------------------------------------------------
 -- 3.2 作品线 · orders（订单状态见词汇表 §2；escrow 见词汇表 §2/§3）
@@ -81,8 +109,10 @@ CREATE TABLE IF NOT EXISTS orders (
   payment_ref   TEXT,
   created_at    TEXT NOT NULL,
   paid_at       TEXT,
+  delivered_at  TEXT,
   completed_at  TEXT,
-  refunded_at   TEXT
+  refunded_at   TEXT,
+  cancelled_at  TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_orders_buyer   ON orders(buyer_id);
 CREATE INDEX IF NOT EXISTS idx_orders_seller  ON orders(seller_id);

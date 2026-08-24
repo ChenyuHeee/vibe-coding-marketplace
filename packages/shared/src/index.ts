@@ -222,3 +222,138 @@ export interface Paginated<T> {
   pageSize: number;
   total: number;
 }
+
+// ---------------------------------------------------------------------------
+// 作品线 DTO（API.md §2/§3/§4，字段按 D2 用 *Cr）
+// ---------------------------------------------------------------------------
+
+/** 作品详情/列表中卖家公开信息 */
+export interface ProjectSeller {
+  id: string;
+  displayName: string;
+  ratingAvg: number;
+}
+
+/** 市场列表条目（GET /api/projects；只列 approved） */
+export interface ProjectListItem {
+  id: string;
+  title: string;
+  category: ProjectCategory;
+  priceCr: Cr;
+  coverUrl: string | null;
+  trialScope: string;
+  playUrl: string;
+  seller: ProjectSeller;
+  avgRating: number;
+  ratingCount: number;
+  status: ProjectReviewStatus;
+  publishedAt: string | null;
+  createdAt: string;
+}
+
+/** 评价条目 */
+export interface ReviewItem {
+  id: string;
+  rating: number;
+  comment: string | null;
+  user: { id: string; displayName: string };
+  createdAt: string;
+}
+
+/** 作品详情（GET /api/projects/:id） */
+export interface ProjectDetail extends ProjectListItem {
+  description: string;
+  reviews: ReviewItem[];
+  isPurchased: boolean;
+  canDownload: boolean;
+  reviewNote: string | null;
+}
+
+/** 审核进度（GET /api/projects/:id/review） */
+export interface ReviewEventItem {
+  event: string;
+  note: string | null;
+  createdAt: string;
+}
+
+export interface ProjectReviewProgress {
+  status: ProjectReviewStatus;
+  reviewNote: string | null;
+  submittedAt: string | null;
+  reviewedAt: string | null;
+  delistedAt: string | null;
+  history: ReviewEventItem[];
+}
+
+/** 订单条目（GET /api/orders） */
+export interface OrderItem {
+  id: string;
+  orderNo: string;
+  project: {
+    id: string;
+    title: string;
+    coverUrl: string | null;
+    playUrl: string;
+    status: ProjectReviewStatus;
+  };
+  priceCr: Cr;
+  feeCr: Cr;
+  totalCr: Cr;
+  status: OrderStatus;
+  escrowStatus: EscrowStatus;
+  createdAt: string;
+  paidAt: string | null;
+  deliveredAt: string | null;
+  completedAt: string | null;
+  refundedAt: string | null;
+  cancelledAt: string | null;
+}
+
+/** 下单前总价预览（GET /api/projects/:id/quote 与 GET /api/orders/:id/quote） */
+export interface OrderQuote {
+  orderId: string | null;
+  projectId: string;
+  projectTitle: string;
+  priceCr: Cr;
+  feeCr: Cr;
+  totalCr: Cr;
+}
+
+/** My Library 条目（GET /api/library；含已下架已购） */
+export interface LibraryItem {
+  project: {
+    id: string;
+    title: string;
+    coverUrl: string | null;
+    playUrl: string;
+    priceCr: Cr;
+    status: ProjectReviewStatus;
+  };
+  orderId: string;
+  orderStatus: OrderStatus;
+  purchasedAt: string;
+}
+
+/** 举报条目（POST /api/projects/:id/report） */
+export interface ReportItem {
+  id: string;
+  projectId: string;
+  reporterId: string;
+  reason: string;
+  createdAt: string;
+}
+
+/** 管理端审核队列条目（GET /api/admin/projects） */
+export interface AdminProjectItem {
+  id: string;
+  title: string;
+  category: ProjectCategory;
+  priceCr: Cr;
+  status: ProjectReviewStatus;
+  seller: ProjectSeller;
+  reviewNote: string | null;
+  submittedAt: string | null;
+  reviewedAt: string | null;
+  publishedAt: string | null;
+  createdAt: string;
+}

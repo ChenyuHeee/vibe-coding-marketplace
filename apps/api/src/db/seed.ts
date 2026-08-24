@@ -166,6 +166,8 @@ export function wipeAll(db: Db): void {
     'contracts',
     'bids',
     'commissions',
+    'reports',
+    'project_review_events',
     'orders',
     'reviews',
     'projects',

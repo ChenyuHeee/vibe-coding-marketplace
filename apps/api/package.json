@@ -14,20 +14,26 @@
   },
   "dependencies": {
     "@vibe/shared": "*",
+    "archiver": "^7.0.1",
     "bcryptjs": "^2.4.3",
     "better-sqlite3": "^12.2.0",
     "cors": "^2.8.5",
     "express": "^4.21.2",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.2.0",
+    "yauzl": "^3.4.0"
   },
   "devDependencies": {
+    "@types/archiver": "^6.0.4",
     "@types/bcryptjs": "^2.4.6",
     "@types/better-sqlite3": "^7.6.13",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.7",
+    "@types/multer": "^1.4.13",
     "@types/node": "^22.10.0",
     "@types/supertest": "^6.0.2",
+    "@types/yauzl": "^2.10.3",
     "supertest": "^7.0.0",
     "tsx": "^4.19.2",
     "typescript": "^5.8.3",
