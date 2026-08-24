@@ -2489,3 +2489,766 @@
   resize: vertical;
   font-family: var(--font-sans);
 }
+
+/* --------------------------------------------------------------------------
+   CommissionCard（需求板卡片）
+   -------------------------------------------------------------------------- */
+.commission-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-4);
+}
+.commission-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-separator);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+  color: var(--color-text-primary);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+.commission-card:hover {
+  border-color: var(--color-separator-opaque);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.commission-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.commission-card__title {
+  margin: 0;
+}
+.commission-card__meta {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.commission-card__meta-item dd {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+}
+.commission-card__meta-item svg {
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   CommissionsPage（需求板：筛选栏）
+   -------------------------------------------------------------------------- */
+.commissions-page__head {
+  margin-bottom: var(--space-4);
+}
+.commissions-page__head p {
+  margin: 0;
+}
+.commissions-page__count {
+  margin: var(--space-3) 0;
+}
+.commission-filters {
+  position: sticky;
+  top: 60px;
+  z-index: 50;
+  background: var(--color-bg-app);
+  border-bottom: 1px solid var(--color-separator);
+  padding: var(--space-3) 0 var(--space-4);
+  margin-bottom: var(--space-4);
+}
+.commission-filters__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.commission-filters__search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 200px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-separator-opaque);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-app);
+  color: var(--color-text-tertiary);
+}
+.commission-filters__search:focus-within {
+  border-color: var(--color-brand);
+}
+.commission-filters__search-input {
+  flex: 1;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: var(--text-body);
+  outline: none;
+}
+.commission-filters__budget,
+.commission-filters__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-text-tertiary);
+}
+.commission-filters__select {
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-separator-opaque);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
+  font-size: var(--text-body-sm);
+  width: 160px;
+}
+.commission-filters__status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+/* --------------------------------------------------------------------------
+   CommissionNewPage（发布需求表单）
+   -------------------------------------------------------------------------- */
+.commission-new__sub {
+  margin: 0 0 var(--space-4);
+}
+.commission-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 720px;
+}
+.commission-form__intent {
+  border: 1px solid var(--color-separator-opaque);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  background: var(--color-bg-app);
+}
+.commission-form__desc {
+  width: 100%;
+  min-height: 88px;
+  border: 0;
+  resize: vertical;
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--text-body-lh);
+}
+.commission-form__desc:focus {
+  outline: none;
+}
+.commission-form__criteria {
+  min-height: 110px;
+  resize: vertical;
+  font-family: var(--font-sans);
+  line-height: var(--text-body-lh);
+  padding: var(--space-3);
+}
+.commission-form__lock-note {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--space-1);
+  color: var(--color-warning-text);
+}
+.commission-form__lock-note svg {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+.commission-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+@media (max-width: 767px) {
+  .commission-form__row {
+    grid-template-columns: 1fr;
+  }
+}
+.commission-form__budget {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.commission-form__budget .form-input {
+  min-width: 0;
+}
+.commission-form__ref-search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-separator-opaque);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-app);
+  color: var(--color-text-tertiary);
+}
+.commission-form__ref-search:focus-within {
+  border-color: var(--color-brand);
+}
+.commission-form__ref-input {
+  flex: 1;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: var(--text-body);
+  outline: none;
+}
+.commission-form__ref-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.commission-form__ref-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-separator);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+.commission-form__ref-item:hover {
+  border-color: var(--color-separator-opaque);
+}
+.commission-form__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* --------------------------------------------------------------------------
+   CommissionDetailPage（需求详情）
+   -------------------------------------------------------------------------- */
+.commission-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.commission-detail__back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  text-decoration: none;
+  color: var(--color-text-secondary);
+  width: fit-content;
+}
+.commission-detail__back:hover {
+  color: var(--color-brand);
+}
+.commission-detail__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.commission-detail__head .page__title {
+  margin-bottom: 0;
+}
+.commission-detail__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+  margin: 0;
+}
+.commission-detail__meta div {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.commission-detail__meta dt {
+  color: var(--color-text-tertiary);
+  font-size: var(--text-caption);
+}
+.commission-detail__meta dd {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-body-sm);
+}
+.commission-detail__section-title {
+  margin: 0 0 var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.commission-detail__desc-text {
+  margin: 0;
+  white-space: pre-wrap;
+}
+.commission-detail__lock {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-warning-text);
+  font-weight: 600;
+  cursor: help;
+  border: 1px solid var(--color-warning);
+  border-radius: var(--radius-full);
+  padding: 2px var(--space-2);
+  background: var(--color-warning-subtle);
+}
+.commission-detail__criteria-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  border-left: 3px solid var(--color-warning);
+  padding-left: var(--space-3);
+  margin-left: var(--space-1);
+}
+.commission-detail__criteria-list li {
+  position: relative;
+  padding-left: var(--space-2);
+}
+.commission-detail__hash {
+  margin: var(--space-2) 0 0;
+  word-break: break-all;
+}
+.commission-detail__ref-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.commission-detail__ref-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-brand);
+  text-decoration: none;
+}
+.commission-detail__ref-link:hover {
+  text-decoration: underline;
+}
+.commission-detail__bids {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.commission-bid {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  flex-wrap: wrap;
+}
+.commission-bid__main {
+  flex: 1;
+  min-width: 200px;
+}
+.commission-bid__main p {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.commission-bid__amount {
+  color: var(--color-brand);
+  font-weight: 700;
+}
+.commission-bid__proposal {
+  margin: var(--space-1) 0 0;
+  white-space: pre-wrap;
+}
+.commission-bid__mine {
+  color: var(--color-brand);
+  font-weight: 600;
+}
+.commission-bid-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 640px;
+}
+.commission-bid-form__row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.commission-bid-form__proposal {
+  min-height: 80px;
+  resize: vertical;
+  font-family: var(--font-sans);
+  line-height: var(--text-body-lh);
+  padding: var(--space-3);
+}
+.commission-detail__mybid {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.select-bid-dialog__amount {
+  display: block;
+  font-size: var(--text-num);
+  line-height: var(--text-num-lh);
+  font-weight: 700;
+  color: var(--color-brand);
+  margin: var(--space-1) 0;
+}
+
+/* --------------------------------------------------------------------------
+   ContractsPage（我的合同列表）
+   -------------------------------------------------------------------------- */
+.contracts-page__sub {
+  margin: 0 0 var(--space-4);
+}
+.contracts-filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+.contracts-filters__roles,
+.contracts-filters__status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.contracts-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.contracts-list__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  text-decoration: none;
+  color: var(--color-text-primary);
+  flex-wrap: wrap;
+}
+.contracts-list__item:hover {
+  border-color: var(--color-separator-opaque);
+}
+.contracts-list__main {
+  flex: 1;
+  min-width: 200px;
+}
+.contracts-list__title {
+  margin: 0;
+}
+.contracts-list__main .text-caption {
+  margin: 2px 0 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+}
+.contracts-list__badges {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.escrow-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.contracts-list__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+}
+
+/* --------------------------------------------------------------------------
+   ContractDetailPage（接单交付详情）
+   -------------------------------------------------------------------------- */
+.contract-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.contract-detail__back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  text-decoration: none;
+  color: var(--color-text-secondary);
+  width: fit-content;
+}
+.contract-detail__back:hover {
+  color: var(--color-brand);
+}
+.contract-detail__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.contract-detail__head .page__title {
+  margin-bottom: 0;
+}
+.contract-detail__stepper {
+  padding: var(--space-5);
+}
+.contract-detail__info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.contract-detail__info p {
+  margin: 0;
+}
+.contract-detail__start {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  border-left: 3px solid var(--color-brand);
+  background: var(--color-brand-subtle);
+}
+.contract-detail__start p {
+  margin: 0;
+}
+
+/* ---- EscrowStatusBar（§8 #5 简化版） ---- */
+.escrow-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-separator);
+  border-radius: var(--radius-lg);
+}
+.escrow-bar__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.escrow-bar__label {
+  text-transform: none;
+}
+.escrow-bar__value {
+  font-size: var(--text-num);
+  line-height: var(--text-num-lh);
+  font-weight: 700;
+  color: var(--color-brand);
+}
+.escrow-bar__holder,
+.escrow-bar__eta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+  color: var(--color-text-primary);
+}
+.escrow-bar__holder svg,
+.escrow-bar__eta svg {
+  color: var(--color-info);
+  flex-shrink: 0;
+}
+.escrow-bar__deco {
+  color: var(--color-text-tertiary);
+}
+
+/* ---- 里程碑提交表单 ---- */
+.contract-milestone-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.contract-milestone-form h2 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+}
+.contract-milestone-form__desc {
+  min-height: 80px;
+  resize: vertical;
+  font-family: var(--font-sans);
+  line-height: var(--text-body-lh);
+  padding: var(--space-3);
+}
+.contract-milestone-form__final {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  cursor: pointer;
+}
+.contract-milestone-form__final input {
+  margin-top: 3px;
+}
+.contract-milestone-form__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ---- 里程碑列表 ---- */
+.contract-milestones__title {
+  margin: var(--space-4) 0 var(--space-3);
+}
+.contract-milestones__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.contract-milestone {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+}
+.contract-milestone__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.contract-milestone__head p {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.contract-milestone__final-tag {
+  color: var(--color-brand);
+  border: 1px solid var(--color-brand);
+  border-radius: var(--radius-full);
+  padding: 1px var(--space-2);
+  font-weight: 600;
+}
+.contract-milestone__desc {
+  margin: 0;
+  white-space: pre-wrap;
+}
+.contract-milestone__feedback {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-left: 3px solid var(--color-warning);
+  background: var(--color-warning-subtle);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+.contract-milestone__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* ---- 交付物预览（先看交付物再确认，§5.2） ---- */
+.deliverable-preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.deliverable-preview__title {
+  margin: 0;
+}
+.deliverable-preview__frame {
+  width: 100%;
+  height: 420px;
+  border: 1px solid var(--color-separator);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+}
+.deliverable-preview__checklist {
+  border-top: 1px solid var(--color-separator);
+  padding-top: var(--space-3);
+}
+.deliverable-preview__check-title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0 0 var(--space-2);
+}
+.deliverable-preview__checks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.deliverable-preview__checks li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ---- 最终验收 ---- */
+.contract-accept {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  border-left: 3px solid var(--color-success);
+  background: var(--color-success-subtle);
+}
+.contract-accept h2 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+}
+.contract-accept p {
+  margin: 0;
+}
+.contract-accept__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* ---- 弹窗（打回 / 放款） ---- */
+.revision-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.revision-dialog__feedback {
+  min-height: 80px;
+  resize: vertical;
+  font-family: var(--font-sans);
+}
+.payout-dialog__amount {
+  font-size: var(--text-num);
+  line-height: var(--text-num-lh);
+  font-weight: 700;
+  color: var(--color-brand);
+}
+.payout-dialog__hint {
+  margin: var(--space-2) 0 0;
+}
