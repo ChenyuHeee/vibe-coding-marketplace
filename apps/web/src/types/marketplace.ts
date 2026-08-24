@@ -94,10 +94,17 @@ export interface PayResult {
   balanceAfterCr: Cr;
 }
 
-/** 举报响应（API.md 草案：POST /api/projects/:id/report） */
+/** 举报响应（PR-B2-A：POST /api/projects/:id/report → 201 { report: {...} }） */
+export interface Report {
+  id: string;
+  projectId: string;
+  reporterId: string;
+  reason: string;
+  createdAt: string;
+}
+
 export interface ReportResult {
-  ok: true;
-  reportId: string;
+  report: Report;
 }
 
 /** 列表查询参数（GET /api/projects） */
