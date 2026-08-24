@@ -76,8 +76,8 @@ export type ContractStatus =
 /** 需求板状态（词汇表 §3） */
 export type CommissionStatus = 'open' | 'in progress' | 'completed' | 'cancelled';
 
-/** 投标状态（词汇表 §3） */
-export type BidStatus = 'submitted' | 'selected' | 'rejected' | 'withdrawn';
+/** 投标状态（词汇表 §3：submitted / selected / rejected / withdrawn / cancelled（需求取消）） */
+export type BidStatus = 'submitted' | 'selected' | 'rejected' | 'withdrawn' | 'cancelled';
 
 /** 钱包与托管流 · 提现状态（词汇表 §4） */
 export type WithdrawalStatus = 'withdrawal pending' | 'withdrawal completed' | 'withdrawal failed';
@@ -227,9 +227,10 @@ export interface Paginated<T> {
 // 作品线 DTO（API.md §2/§3/§4，字段按 D2 用 *Cr）
 // ---------------------------------------------------------------------------
 
-/** 作品详情/列表中卖家公开信息 */
+/** 作品详情/列表中卖家公开信息（email 供前端「联系卖家」mailto，PR-B3-A 附带任务） */
 export interface ProjectSeller {
   id: string;
+  email: string;
   displayName: string;
   ratingAvg: number;
 }
@@ -355,5 +356,53 @@ export interface AdminProjectItem {
   submittedAt: string | null;
   reviewedAt: string | null;
   publishedAt: string | null;
+  createdAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// 需求线 DTO（API.md §5/§6，字段按 D2 用 *Cr；状态词见词汇表 §3）
+// ---------------------------------------------------------------------------
+
+/** 需求板列表条目（GET /api/commissions；公开） */
+export interface CommissionListItem {
+  id: string;
+  title: string;
+  budgetMinCr: Cr;
+  budgetMaxCr: Cr;
+  timelineDays: number;
+  status: CommissionStatus;
+  bidCount: number;
+  buyer: { id: string; displayName: string };
+  createdAt: string;
+}
+
+/** 需求详情中的投标条目（contractor 只暴露 displayName，不泄露联系方式） */
+export interface CommissionBidItem {
+  id: string;
+  contractor: { id: string; displayName: string };
+  amountCr: Cr;
+  proposal: string;
+  status: BidStatus;
+  createdAt: string;
+}
+
+/** 需求详情（GET /api/commissions/:id；公开，bids 仅登录用户可见） */
+export interface CommissionDetail extends CommissionListItem {
+  description: string;
+  /** 验收标准，发布即锁定（acceptance_criteria） */
+  acceptanceCriteria: string;
+  /** 验收标准内容 hash（criteria_hash，锁定证明与纠纷溯源） */
+  criteriaHash: string;
+  referenceProjects: { id: string; title: string }[];
+  bids: CommissionBidItem[];
+}
+
+/** 我的投标条目（GET /api/bids/mine，contractor） */
+export interface MyBidItem {
+  id: string;
+  commission: { id: string; title: string; status: CommissionStatus };
+  amountCr: Cr;
+  proposal: string;
+  status: BidStatus;
   createdAt: string;
 }

@@ -55,6 +55,7 @@ interface ProjectRow {
 }
 
 export interface ProjectWithSellerRow extends ProjectRow {
+  seller_email: string;
   seller_display_name: string;
   seller_rating_avg: number;
 }
@@ -62,7 +63,7 @@ export interface ProjectWithSellerRow extends ProjectRow {
 export function getProjectRow(db: Db, projectId: string): ProjectWithSellerRow {
   const row = db
     .prepare(
-      `SELECT p.*, u.display_name AS seller_display_name, u.rating_avg AS seller_rating_avg
+      `SELECT p.*, u.email AS seller_email, u.display_name AS seller_display_name, u.rating_avg AS seller_rating_avg
        FROM projects p JOIN users u ON u.id = p.seller_id
        WHERE p.id = ?`,
     )
@@ -84,7 +85,12 @@ export function toProjectListItem(row: ProjectWithSellerRow): ProjectListItem {
     coverUrl: row.cover_url,
     trialScope: row.trial_scope,
     playUrl: playUrlOf(row.id),
-    seller: { id: row.seller_id, displayName: row.seller_display_name, ratingAvg: row.seller_rating_avg },
+    seller: {
+      id: row.seller_id,
+      email: row.seller_email,
+      displayName: row.seller_display_name,
+      ratingAvg: row.seller_rating_avg,
+    },
     avgRating: row.avg_rating,
     ratingCount: row.rating_count,
     status: row.status,
@@ -188,7 +194,7 @@ export function listProjects(
   ).c;
   const rows = db
     .prepare(
-      `SELECT p.*, u.display_name AS seller_display_name, u.rating_avg AS seller_rating_avg
+      `SELECT p.*, u.email AS seller_email, u.display_name AS seller_display_name, u.rating_avg AS seller_rating_avg
        FROM projects p JOIN users u ON u.id = p.seller_id
        WHERE ${whereSql} ORDER BY ${orderBy[sort as ProjectSort]} LIMIT ? OFFSET ?`,
     )
@@ -478,7 +484,7 @@ export function adminListProjects(
   ).c;
   const rows = db
     .prepare(
-      `SELECT p.*, u.display_name AS seller_display_name, u.rating_avg AS seller_rating_avg
+      `SELECT p.*, u.email AS seller_email, u.display_name AS seller_display_name, u.rating_avg AS seller_rating_avg
        FROM projects p JOIN users u ON u.id = p.seller_id
        ${whereSql} ORDER BY p.submitted_at IS NULL, p.submitted_at ASC, p.created_at ASC LIMIT ? OFFSET ?`,
     )
@@ -491,7 +497,12 @@ export function adminListProjects(
       category: r.category as ProjectCategory,
       priceCr: r.price_cr,
       status: r.status,
-      seller: { id: r.seller_id, displayName: r.seller_display_name, ratingAvg: r.seller_rating_avg },
+      seller: {
+        id: r.seller_id,
+        email: r.seller_email,
+        displayName: r.seller_display_name,
+        ratingAvg: r.seller_rating_avg,
+      },
       reviewNote: r.review_note,
       submittedAt: r.submitted_at,
       reviewedAt: r.reviewed_at,
