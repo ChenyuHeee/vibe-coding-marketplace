@@ -266,7 +266,7 @@ export function listTransactions(
   ).c;
   const rows = db
     .prepare(
-      `SELECT * FROM transactions WHERE ${whereSql} ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?`,
+      `SELECT * FROM transactions WHERE ${whereSql} ORDER BY created_at DESC, rowid DESC LIMIT ? OFFSET ?`,
     )
     .all(...params, pageSize, (page - 1) * pageSize) as TransactionRow[];
 
@@ -376,7 +376,7 @@ export function listWithdrawals(
   ).c;
   const rows = db
     .prepare(
-      `SELECT * FROM withdrawals WHERE ${whereSql} ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?`,
+      `SELECT * FROM withdrawals WHERE ${whereSql} ORDER BY created_at DESC, rowid DESC LIMIT ? OFFSET ?`,
     )
     .all(...params, pageSize, (page - 1) * pageSize) as WithdrawalRow[];
 
