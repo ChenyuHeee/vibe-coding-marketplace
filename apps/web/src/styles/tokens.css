@@ -1,0 +1,253 @@
+/* ==========================================================================
+   Design Tokens —— docs/DESIGN_SYSTEM.md §2 的 CSS 落地（唯一色值/数值来源）
+   --------------------------------------------------------------------------
+   约定（DESIGN_SYSTEM §2）：
+   - 一套 token + 双模式（light/dark 自动切换），禁止维护两套调色板；
+   - :root 定义 light 值；@media (prefers-color-scheme: dark) 与
+     [data-theme="dark"] 定义 dark 值；根元素 color-scheme: light dark；
+   - 组件代码只引用变量名，禁止硬编码色值。
+   深色模式三规则（§2.2）：纯白降亮度、大色块降饱和（subtle 用低透明度叠底）、
+   分割线用系统分隔色。层级 = 表面色阶 + 1px 边框（§2.6），仅真浮层用低透明度阴影。
+   ========================================================================== */
+
+:root {
+  color-scheme: light dark;
+
+  /* ---- 颜色语义集 §2.1：每类 4 个 token（fill/text/subtle/border）---- */
+  --color-brand: #4f46e5;
+  --color-brand-hover: #4338ca;
+  --color-brand-active: #3730a3;
+  --color-brand-subtle: #eef2ff;
+  --color-on-brand: #ffffff;
+
+  --color-success: #16a34a;
+  --color-success-text: #15803d;
+  --color-success-subtle: #f0fdf4;
+
+  --color-warning: #d97706;
+  --color-warning-text: #b45309;
+  --color-warning-subtle: #fffbeb;
+
+  --color-error: #dc2626;
+  --color-error-text: #b91c1c;
+  --color-error-subtle: #fef2f2;
+
+  --color-info: #0284c7;
+  --color-info-text: #0369a1;
+  --color-info-subtle: #f0f9ff;
+
+  /* ---- 文字层级 §2.1/§2.3 ---- */
+  --color-text-primary: #1a1d21;
+  --color-text-secondary: #4b5563;
+  --color-text-tertiary: #6b7280;
+  --color-text-disabled: #6b7280;
+  --color-text-placeholder: #6b7280;
+
+  /* ---- 背景与表面 §2.1 ---- */
+  --color-bg-app: #ffffff;
+  --color-bg-surface: #f7f8fa;
+  --color-bg-subtle: #f2f3f5;
+  --color-bg-overlay: rgba(17, 17, 19, 0.5);
+  --color-separator: #e5e5ea;
+  --color-separator-opaque: #d1d1d6;
+
+  /* ---- 焦点环 §7.1 ---- */
+  --color-ring: #6366f1;
+  --ring-soft: rgba(99, 102, 241, 0.35);
+
+  /* ---- 文字层级 §2.3（字号/行高/字重成对给出） ---- */
+  --text-display: 32px;
+  --text-display-lh: 40px;
+  --text-h1: 24px;
+  --text-h1-lh: 32px;
+  --text-h2: 20px;
+  --text-h2-lh: 28px;
+  --text-h3: 17px;
+  --text-h3-lh: 24px;
+  --text-body: 15px;
+  --text-body-lh: 22px;
+  --text-body-sm: 14px;
+  --text-body-sm-lh: 20px;
+  --text-aux: 13px;
+  --text-aux-lh: 18px;
+  --text-caption: 12px;
+  --text-caption-lh: 16px;
+  --text-num: 22px;
+  --text-num-lh: 28px;
+
+  --font-sans: system-ui, -apple-system, 'PingFang SC', 'HarmonicOS Sans SC',
+    'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+
+  /* ---- 间距 §2.4（4pt 基数） ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* ---- 圆角 §2.5 ---- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 999px;
+
+  /* ---- 阴影 §2.6（浅色：真实阴影表达层级） ---- */
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05);
+  --shadow-md: 0 4px 12px rgba(16, 24, 40, 0.08);
+  --shadow-lg: 0 16px 40px rgba(16, 24, 40, 0.14);
+
+  /* ---- 触控目标 §7.4 ---- */
+  --touch-target: 44px;
+
+  /* ---- 业务常量（集中配置，见 docs/DECISIONS.md） ---- */
+  --topup-confirm-threshold-cr: 100; /* A1：大额充值二次确认阈值（CR） */
+  --fee-rate: 0.05; /* A5：平台手续费 5% */
+  --withdrawal-eta-days: '1–3 个工作日'; /* A4 */
+}
+
+/* ---- 深色模式（系统偏好，自动） ---- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-brand: #818cf8;
+    --color-brand-hover: #a5b4fc;
+    --color-brand-active: #c7d2fe;
+    --color-brand-subtle: rgba(129, 140, 248, 0.16);
+    --color-on-brand: #0f1420;
+
+    --color-success: #4ade80;
+    --color-success-text: #4ade80;
+    --color-success-subtle: rgba(74, 222, 128, 0.14);
+
+    --color-warning: #fbbf24;
+    --color-warning-text: #fbbf24;
+    --color-warning-subtle: rgba(251, 191, 36, 0.14);
+
+    --color-error: #f87171;
+    --color-error-text: #f87171;
+    --color-error-subtle: rgba(248, 113, 113, 0.14);
+
+    --color-info: #38bdf8;
+    --color-info-text: #38bdf8;
+    --color-info-subtle: rgba(56, 189, 248, 0.14);
+
+    /* 纯白降亮度（§2.2 规则 1） */
+    --color-text-primary: #e6e6e6;
+    --color-text-secondary: #b0b5bc;
+    --color-text-tertiary: #8e959d;
+    --color-text-disabled: #8e959d;
+    --color-text-placeholder: #8e959d;
+
+    --color-bg-app: #121214;
+    --color-bg-surface: #1c1c1f;
+    --color-bg-subtle: #242427;
+    --color-bg-overlay: rgba(0, 0, 0, 0.6);
+    --color-separator: #3a3a3c;
+    --color-separator-opaque: #48484a;
+
+    --color-ring: #a5b4fc;
+    --ring-soft: rgba(165, 180, 252, 0.35);
+
+    /* 深色：层级 = 表面色阶 + 1px 边框；普通卡片无阴影（§2.6 规则 2） */
+    --shadow-sm: none;
+    --shadow-md: none;
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.45);
+  }
+}
+
+/* ---- 显式主题切换（data-theme）优先级高于系统偏好（specificity 更高） ---- */
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --color-brand: #4f46e5;
+  --color-brand-hover: #4338ca;
+  --color-brand-active: #3730a3;
+  --color-brand-subtle: #eef2ff;
+  --color-on-brand: #ffffff;
+
+  --color-success: #16a34a;
+  --color-success-text: #15803d;
+  --color-success-subtle: #f0fdf4;
+
+  --color-warning: #d97706;
+  --color-warning-text: #b45309;
+  --color-warning-subtle: #fffbeb;
+
+  --color-error: #dc2626;
+  --color-error-text: #b91c1c;
+  --color-error-subtle: #fef2f2;
+
+  --color-info: #0284c7;
+  --color-info-text: #0369a1;
+  --color-info-subtle: #f0f9ff;
+
+  --color-text-primary: #1a1d21;
+  --color-text-secondary: #4b5563;
+  --color-text-tertiary: #6b7280;
+  --color-text-disabled: #6b7280;
+  --color-text-placeholder: #6b7280;
+
+  --color-bg-app: #ffffff;
+  --color-bg-surface: #f7f8fa;
+  --color-bg-subtle: #f2f3f5;
+  --color-bg-overlay: rgba(17, 17, 19, 0.5);
+  --color-separator: #e5e5ea;
+  --color-separator-opaque: #d1d1d6;
+
+  --color-ring: #6366f1;
+  --ring-soft: rgba(99, 102, 241, 0.35);
+
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05);
+  --shadow-md: 0 4px 12px rgba(16, 24, 40, 0.08);
+  --shadow-lg: 0 16px 40px rgba(16, 24, 40, 0.14);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-brand: #818cf8;
+  --color-brand-hover: #a5b4fc;
+  --color-brand-active: #c7d2fe;
+  --color-brand-subtle: rgba(129, 140, 248, 0.16);
+  --color-on-brand: #0f1420;
+
+  --color-success: #4ade80;
+  --color-success-text: #4ade80;
+  --color-success-subtle: rgba(74, 222, 128, 0.14);
+
+  --color-warning: #fbbf24;
+  --color-warning-text: #fbbf24;
+  --color-warning-subtle: rgba(251, 191, 36, 0.14);
+
+  --color-error: #f87171;
+  --color-error-text: #f87171;
+  --color-error-subtle: rgba(248, 113, 113, 0.14);
+
+  --color-info: #38bdf8;
+  --color-info-text: #38bdf8;
+  --color-info-subtle: rgba(56, 189, 248, 0.14);
+
+  --color-text-primary: #e6e6e6;
+  --color-text-secondary: #b0b5bc;
+  --color-text-tertiary: #8e959d;
+  --color-text-disabled: #8e959d;
+  --color-text-placeholder: #8e959d;
+
+  --color-bg-app: #121214;
+  --color-bg-surface: #1c1c1f;
+  --color-bg-subtle: #242427;
+  --color-bg-overlay: rgba(0, 0, 0, 0.6);
+  --color-separator: #3a3a3c;
+  --color-separator-opaque: #48484a;
+
+  --color-ring: #a5b4fc;
+  --ring-soft: rgba(165, 180, 252, 0.35);
+
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.45);
+}

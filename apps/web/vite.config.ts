@@ -4,10 +4,12 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 5173,
+    // 端口约定见 docs/DEPLOYMENT.md：Web 入口绑定 127.0.0.1:8090，只被 nginx 反代访问
+    host: '127.0.0.1',
+    port: 8090,
     // 开发时把 /api 代理到后端，避免跨域
     proxy: {
-      '/api': 'http://localhost:3001',
+      '/api': 'http://127.0.0.1:3001',
     },
   },
   test: {
