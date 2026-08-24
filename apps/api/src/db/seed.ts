@@ -116,6 +116,34 @@ export function seed(db: Db, options: SeedOptions = {}): void {
     for (const b of DEMO_BIDS) {
       insertBid.run(b.id, b.commissionId, b.contractorId, b.amountCr, b.proposal, now);
     }
+
+    // ------------------------------------------------------------------
+    // 演示托管订单（PR-B2）：buyer 购买《贪吃蛇 Classic》，已支付、资金在托管
+    // buyer 余额 5000 → 4475（525 CR = 500 价 + 25 手续费 进托管）；seller 侧为待收托管
+    // ------------------------------------------------------------------
+    db.prepare(
+      `INSERT INTO orders (id, order_no, buyer_id, project_id, seller_id, price_cr, fee_cr, total_cr, status, escrow_status, payment_ref, created_at, paid_at)
+       VALUES ('ord_demo_1', 'VCM202608240001', 'usr_buyer', 'proj_snake', 'usr_seller', 500, 25, 525, 'paid', 'held', 'PAY-DEMO-0001', ?, ?)`,
+    ).run(now, now);
+    db.prepare(
+      `INSERT INTO transactions (id, user_id, type, direction, amount_cr, balance_after_cr, ref_type, ref_id, status, note, created_at)
+       VALUES (?, 'usr_buyer', 'escrow_hold', 'debit', 525, 4475, 'order', 'ord_demo_1', 'completed', '购买《贪吃蛇 Classic》已支付，资金托管中（含 5% 手续费）', ?)`,
+    ).run(randomUUID(), now);
+    db.prepare(`UPDATE wallets SET balance_cr = 4475, updated_at = ? WHERE user_id = 'usr_buyer'`).run(now);
+
+    // ------------------------------------------------------------------
+    // 演示提现（PR-B2）：seller 发起 500 CR 提现（withdrawal pending，1–3 个工作日）
+    // seller 余额 2000 → 1500；pendingWithdrawalCr = 500
+    // ------------------------------------------------------------------
+    db.prepare(
+      `INSERT INTO withdrawals (id, user_id, amount_cr, bank_info, status, eta_days, created_at)
+       VALUES ('wdr_demo_1', 'usr_seller', 500, ?, 'withdrawal pending', 2, ?)`,
+    ).run(JSON.stringify({ bankName: '演示银行', cardLast4: '8888', holderName: '演示卖家' }), now);
+    db.prepare(
+      `INSERT INTO transactions (id, user_id, type, direction, amount_cr, balance_after_cr, ref_type, ref_id, status, note, created_at)
+       VALUES (?, 'usr_seller', 'withdrawal', 'debit', 500, 1500, 'withdrawal', 'wdr_demo_1', 'completed', '提现申请：演示银行 ****8888，预计 2 个工作日到账', ?)`,
+    ).run(randomUUID(), now);
+    db.prepare(`UPDATE wallets SET balance_cr = 1500, updated_at = ? WHERE user_id = 'usr_seller'`).run(now);
   });
 
   tx();

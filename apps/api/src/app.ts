@@ -5,6 +5,7 @@ import { defaultDbPath, migrate, openDb, type Db } from './db';
 import { seedIfEmpty } from './db/seed';
 import { errorHandler, notFoundHandler } from './lib/errors';
 import authRouter from './routes/auth';
+import walletRouter from './routes/wallet';
 
 export interface CreateAppOptions {
   /** SQLite 路径；默认取 DATABASE_PATH 或 <cwd>/data/app.db；测试传 ':memory:' */
@@ -52,6 +53,7 @@ export function createApp(options: CreateAppOptions = {}): Express {
 
   // 业务路由
   app.use('/api/auth', authRouter);
+  app.use('/api/wallet', walletRouter);
 
   // 404 + 统一错误处理（{ error: { code, message, details? } }）
   app.use(notFoundHandler);

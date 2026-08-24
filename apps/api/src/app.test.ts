@@ -33,7 +33,11 @@ describe('db bootstrap', () => {
     const db = getDb(app);
     const users = db.prepare('SELECT COUNT(*) AS c FROM users').get() as { c: number };
     const projects = db.prepare('SELECT COUNT(*) AS c FROM projects').get() as { c: number };
+    const orders = db.prepare('SELECT COUNT(*) AS c FROM orders').get() as { c: number };
+    const withdrawals = db.prepare('SELECT COUNT(*) AS c FROM withdrawals').get() as { c: number };
     expect(users.c).toBe(4);
     expect(projects.c).toBe(4);
+    expect(orders.c).toBe(1); // 演示托管订单（escrow held）
+    expect(withdrawals.c).toBe(1); // 演示提现（withdrawal pending）
   });
 });
