@@ -1,0 +1,64 @@
+# vibers.hechenyu.xin vhost 模板（免端口 HTTPS，可选）
+# 用途：由服务器管理员（root）部署到系统 nginx，参考 /opt/dsh/nginx/dsh.site.conf 模式。
+# 步骤：1) 本文件放入 /etc/nginx/sites-available/vibers 并 ln -s 到 sites-enabled
+#       2) certbot certonly --webroot -w /var/www/letsencrypt -d vibers.hechenyu.xin
+#       3) nginx -t && systemctl reload nginx
+# 后端应用监听 127.0.0.1:8090（对外端口方式访问期间保持不变，二者可并存）。
+
+# ── HTTP: ACME challenge + permanent redirect to HTTPS ──────────────────────
+server {
+    listen 80;
+    listen [::]:80;
+    server_name vibers.hechenyu.xin;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/letsencrypt;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+# ── HTTPS ───────────────────────────────────────────────────────────────────
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name vibers.hechenyu.xin;
+
+    # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/vibers.hechenyu.xin/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/vibers.hechenyu.xin/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    include /etc/nginx/conf.d/security-headers.conf;
+
+    client_max_body_size 50m;
+
+    # WebSocket 升级（Vite HMR / 未来实时功能）
+    map $http_upgrade $connection_upgrade {
+        default upgrade;
+        ''      close;
+    }
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:3001;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8090;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+    }
+}
