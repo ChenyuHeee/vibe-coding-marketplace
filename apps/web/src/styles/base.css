@@ -1,0 +1,348 @@
+/* ==========================================================================
+   全局样式 —— 字体栈/焦点环/禁用态/触控目标/文字层级/按钮体系
+   依据 docs/DESIGN_SYSTEM.md §2.3、§7
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
+  font-size: var(--text-body);
+  line-height: var(--text-body-lh);
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- 焦点可见 §7.1（硬性要求）：只对 :focus-visible ---- */
+:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--ring-soft);
+}
+
+/* ---- 触控目标 §7.4：可交互元素命中区 ≥ 44×44（按钮可视高 40 可接受，padding 补齐） ---- */
+button,
+a,
+[role='button'],
+input,
+select,
+textarea,
+label.chip,
+.tab-item {
+  min-height: var(--touch-target);
+}
+
+/* ---- 禁用按钮可读 + 附说明（§7.2，禁用 ≠ 看不见） ---- */
+button:disabled,
+.btn:disabled,
+button[aria-disabled='true'] {
+  background: var(--color-bg-subtle) !important;
+  color: var(--color-text-disabled) !important;
+  border: 1px solid var(--color-separator) !important;
+  cursor: not-allowed;
+  opacity: 1;
+  box-shadow: none;
+}
+button:disabled .btn-icon,
+.btn:disabled .btn-icon {
+  color: var(--color-text-disabled);
+}
+
+/* ---- 金额/数字一律 tabular-nums（§2.3） ---- */
+.num,
+.amount {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+/* ==========================================================================
+   文字层级 §2.3（所有数值成对：字号/行高）
+   ========================================================================== */
+
+.text-display {
+  font-size: var(--text-display);
+  line-height: var(--text-display-lh);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.text-h1 {
+  font-size: var(--text-h1);
+  line-height: var(--text-h1-lh);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.text-h2 {
+  font-size: var(--text-h2);
+  line-height: var(--text-h2-lh);
+  font-weight: 600;
+  margin: 0;
+}
+.text-h3 {
+  font-size: var(--text-h3);
+  line-height: var(--text-h3-lh);
+  font-weight: 600;
+  margin: 0;
+}
+.text-body {
+  font-size: var(--text-body);
+  line-height: var(--text-body-lh);
+  font-weight: 400;
+}
+.text-body-sm {
+  font-size: var(--text-body-sm);
+  line-height: var(--text-body-sm-lh);
+  font-weight: 400;
+}
+.text-aux {
+  font-size: var(--text-aux);
+  line-height: var(--text-aux-lh);
+  font-weight: 400;
+}
+.text-caption {
+  font-size: var(--text-caption);
+  line-height: var(--text-caption-lh);
+  font-weight: 400;
+}
+.text-num {
+  font-size: var(--text-num);
+  line-height: var(--text-num-lh);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.text-secondary {
+  color: var(--color-text-secondary);
+}
+.text-tertiary {
+  color: var(--color-text-tertiary);
+}
+.text-disabled {
+  color: var(--color-text-disabled);
+}
+.text-success {
+  color: var(--color-success-text);
+}
+.text-warning {
+  color: var(--color-warning-text);
+}
+.text-error {
+  color: var(--color-error-text);
+}
+.text-info {
+  color: var(--color-info-text);
+}
+
+/* ==========================================================================
+   按钮体系（§5.2 按钮层级：primary / secondary / ghost / danger-ghost）
+   ========================================================================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--touch-target);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  font-size: var(--text-body);
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.08s ease;
+  user-select: none;
+}
+.btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.btn:disabled {
+  transform: none;
+}
+.btn .btn-icon {
+  flex-shrink: 0;
+}
+
+/* 主按钮（唯一 primary） */
+.btn-primary {
+  background: var(--color-brand);
+  color: var(--color-on-brand);
+  border-color: var(--color-brand);
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-brand-hover);
+  border-color: var(--color-brand-hover);
+}
+.btn-primary:active:not(:disabled) {
+  background: var(--color-brand-active);
+  border-color: var(--color-brand-active);
+}
+
+/* 次按钮（描边） */
+.btn-secondary {
+  background: transparent;
+  color: var(--color-text-primary);
+  border-color: var(--color-separator-opaque);
+}
+.btn-secondary:hover:not(:disabled) {
+  background: var(--color-bg-surface);
+  border-color: var(--color-text-tertiary);
+}
+
+/* 幽灵/文字按钮 */
+.btn-ghost {
+  background: transparent;
+  color: var(--color-text-secondary);
+  border-color: transparent;
+  padding-left: var(--space-3);
+  padding-right: var(--space-3);
+}
+.btn-ghost:hover:not(:disabled) {
+  background: var(--color-bg-subtle);
+  color: var(--color-text-primary);
+}
+
+/* 危险实心（二次确认中的不可逆动作，如确认放款）。
+   文字用 --color-on-error：light #FFF on #DC2626 4.83:1 / dark #0F1420 on #F87171 6.65:1（AA） */
+.btn-danger {
+  background: var(--color-error);
+  color: var(--color-on-error);
+  border-color: var(--color-error);
+}
+.btn-danger:hover:not(:disabled) {
+  background: var(--color-error-text);
+  border-color: var(--color-error-text);
+}
+
+/* 危险幽灵（Q2 Cancel、下架等） */
+.btn-danger-ghost {
+  background: transparent;
+  color: var(--color-error-text);
+  border-color: transparent;
+}
+.btn-danger-ghost:hover:not(:disabled) {
+  background: var(--color-error-subtle);
+}
+
+/* 紧凑（允许 40px 可视高，但 padding/命中区保持 ≥44，见 §7.4） */
+.btn-sm {
+  min-height: 40px;
+  padding-top: 0;
+  padding-bottom: 0;
+  font-size: var(--text-body-sm);
+}
+/* 命中区补齐到 44px */
+.btn-sm::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+}
+.btn-sm {
+  position: relative;
+}
+
+/* ==========================================================================
+   Chip（胶囊按钮，§4.1 示例 chip / 澄清追问选项）
+   ========================================================================== */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--touch-target);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-separator-opaque);
+  background: var(--color-bg-surface);
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+.chip:hover:not(:disabled) {
+  background: var(--color-brand-subtle);
+  border-color: var(--color-brand);
+  color: var(--color-text-primary);
+}
+.chip[aria-pressed='true'],
+.chip.is-selected {
+  background: var(--color-brand-subtle);
+  border-color: var(--color-brand);
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   卡片 / 分隔 / 工具类
+   ========================================================================== */
+
+.card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-separator);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-5);
+}
+.card--interactive:hover {
+  border-color: var(--color-separator-opaque);
+  box-shadow: var(--shadow-md);
+}
+
+.separator {
+  height: 1px;
+  background: var(--color-separator);
+  border: 0;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* 可访问性：尊重减少动态偏好 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

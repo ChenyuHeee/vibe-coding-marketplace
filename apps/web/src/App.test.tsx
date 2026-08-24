@@ -1,26 +1,41 @@
 import { render, screen } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { MemoryRouter } from 'react-router-dom';
+import { describe, expect, it } from 'vitest';
 import App from './App';
+import { ThemeProvider } from './context/ThemeContext';
+
+function renderApp(initialPath = '/') {
+  return render(
+    <ThemeProvider>
+      <MemoryRouter initialEntries={[initialPath]}>
+        <App />
+      </MemoryRouter>
+    </ThemeProvider>,
+  );
+}
 
 describe('App', () => {
-  beforeEach(() => {
-    // 测试环境无后端，fetch 直接失败 → 页面进入 error 态（四状态之一）
-    vi.stubGlobal('fetch', vi.fn(() => Promise.reject(new Error('no server'))));
-  });
-
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
-  it('renders the marketplace title', async () => {
-    render(<App />);
+  it('renders the marketplace title on home', () => {
+    renderApp('/');
     expect(screen.getByRole('heading', { name: 'Vibe Coding Marketplace' })).toBeInTheDocument();
-    // 等待 fetch 副作用落定，避免 act 警告
-    await screen.findByText(/API 状态：不可用/);
   });
 
-  it('shows the error state when the API is unreachable', async () => {
-    render(<App />);
-    expect(await screen.findByText(/API 状态：不可用/)).toBeInTheDocument();
+  it('renders the global nav with My Library always visible (两步回 My Library, §5.1)', () => {
+    renderApp('/');
+    // 顶栏 + 移动 TabBar 各渲染一份导航（jsdom 无媒体查询，两者都在 DOM 中）
+    expect(screen.getByRole('link', { name: /My Library/ })).toBeInTheDocument();
+    expect(screen.getAllByRole('link', { name: /^Marketplace$/ }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('link', { name: '需求板' }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('link', { name: '钱包' }).length).toBeGreaterThan(0);
+  });
+
+  it('navigates to Marketplace placeholder page', () => {
+    renderApp('/marketplace');
+    expect(screen.getByRole('heading', { name: 'Marketplace' })).toBeInTheDocument();
+  });
+
+  it('renders 404 empty state for unknown routes', () => {
+    renderApp('/no-such-page');
+    expect(screen.getByText('页面不存在')).toBeInTheDocument();
   });
 });
