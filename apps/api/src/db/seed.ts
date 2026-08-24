@@ -1,16 +1,10 @@
 import { randomUUID } from 'node:crypto';
-import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import bcrypt from 'bcryptjs';
 import { defaultDbPath, defaultUploadsDir, migrate, openDb, type Db } from './index';
 import { DEMO_BIDS, DEMO_COMMISSION, DEMO_PROJECTS, DEMO_USERS } from './demo-data';
-
-/** 验收标准 hash（sha256 前缀，用于「发布即锁定」证明与纠纷溯源） */
-export function hashCriteria(criteria: string): string {
-  const hex = createHash('sha256').update(criteria).digest('hex');
-  return `sha256:${hex}`;
-}
+import { hashCriteria } from '../lib/criteria';
 
 export interface SeedOptions {
   uploadsDir?: string;

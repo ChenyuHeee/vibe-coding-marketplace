@@ -12,6 +12,8 @@ import playRouter from './routes/play';
 import filesRouter from './routes/files';
 import ordersRouter from './routes/orders';
 import libraryRouter from './routes/library';
+import commissionsRouter from './routes/commissions';
+import bidsRouter from './routes/bids';
 import { listCategories } from './services/projects';
 
 export interface CreateAppOptions {
@@ -68,6 +70,8 @@ export function createApp(options: CreateAppOptions = {}): Express {
   app.use('/api/files', filesRouter);
   app.use('/api/orders', ordersRouter);
   app.use('/api/library', libraryRouter);
+  app.use('/api/commissions', commissionsRouter);
+  app.use('/api/bids', bidsRouter);
   app.get('/api/categories', (_req, res) => {
     res.json(listCategories());
   });
