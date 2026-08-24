@@ -10,6 +10,8 @@ import projectsRouter from './routes/projects';
 import adminRouter from './routes/admin';
 import playRouter from './routes/play';
 import filesRouter from './routes/files';
+import ordersRouter from './routes/orders';
+import libraryRouter from './routes/library';
 import { listCategories } from './services/projects';
 
 export interface CreateAppOptions {
@@ -64,6 +66,8 @@ export function createApp(options: CreateAppOptions = {}): Express {
   app.use('/api/projects', projectsRouter);
   app.use('/api/admin', adminRouter);
   app.use('/api/files', filesRouter);
+  app.use('/api/orders', ordersRouter);
+  app.use('/api/library', libraryRouter);
   app.get('/api/categories', (_req, res) => {
     res.json(listCategories());
   });

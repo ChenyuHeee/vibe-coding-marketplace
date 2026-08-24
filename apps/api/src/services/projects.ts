@@ -537,3 +537,84 @@ export function adminReject(db: Db, projectId: string, adminId: string, reviewNo
   recordEvent(db, projectId, 'rejected', adminId, trimmed);
   return getProjectRow(db, projectId);
 }
+
+// ---------------------------------------------------------------------------
+// 评分（PR-B2-B）：已购买家一人一作一评，更新作品与卖家聚合评分
+// ---------------------------------------------------------------------------
+
+export function addReview(
+  db: Db,
+  userId: string,
+  projectId: string,
+  rating: unknown,
+  comment: unknown,
+): ReviewItem {
+  const project = getProjectRow(db, projectId);
+  if (!hasPurchased(db, userId, projectId)) {
+    throw ApiError.forbidden('只有已购买家可以评价该作品');
+  }
+  if (!Number.isInteger(rating) || (rating as number) < 1 || (rating as number) > 5) {
+    throw ApiError.badRequest('VALIDATION', 'rating 必须是 1–5 的整数');
+  }
+  const commentStr = typeof comment === 'string' ? comment.trim() : '';
+  if (commentStr.length > 500) {
+    throw ApiError.badRequest('VALIDATION', '评价内容最长 500 字');
+  }
+
+  const orderRow = db
+    .prepare(
+      `SELECT id FROM orders WHERE buyer_id = ? AND project_id = ? AND status IN ('paid','delivered','completed') LIMIT 1`,
+    )
+    .get(userId, projectId) as { id: string } | undefined;
+  if (!orderRow) {
+    throw ApiError.forbidden('只有已购买家可以评价该作品');
+  }
+  const dup = db
+    .prepare('SELECT COUNT(*) AS c FROM reviews WHERE project_id = ? AND user_id = ?')
+    .get(projectId, userId) as { c: number };
+  if (dup.c > 0) {
+    throw ApiError.conflict('你已评价过该作品（一人一作一评）');
+  }
+
+  const reviewId = randomUUID();
+  const now = new Date().toISOString();
+  const tx = db.transaction(() => {
+    db.prepare(
+      `INSERT INTO reviews (id, project_id, user_id, order_id, rating, comment, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    ).run(reviewId, projectId, userId, orderRow.id, rating, commentStr === '' ? null : commentStr, now);
+
+    // 作品聚合评分
+    db.prepare(
+      `UPDATE projects SET
+         avg_rating = COALESCE((SELECT AVG(rating) FROM reviews WHERE project_id = ?), 0),
+         rating_count = (SELECT COUNT(*) FROM reviews WHERE project_id = ?),
+         updated_at = ?
+       WHERE id = ?`,
+    ).run(projectId, projectId, now, projectId);
+    // 卖家聚合评分（其名下全部作品的评价）
+    db.prepare(
+      `UPDATE users SET
+         rating_avg = COALESCE((SELECT AVG(r.rating) FROM reviews r JOIN projects p ON p.id = r.project_id WHERE p.seller_id = ?), 0),
+         rating_count = (SELECT COUNT(*) FROM reviews r JOIN projects p ON p.id = r.project_id WHERE p.seller_id = ?),
+         updated_at = ?
+       WHERE id = ?`,
+    ).run(project.seller_id, project.seller_id, now, project.seller_id);
+  });
+  tx();
+
+  const row = db
+    .prepare(
+      `SELECT r.id, r.rating, r.comment, r.user_id, u.display_name, r.created_at
+       FROM reviews r JOIN users u ON u.id = r.user_id WHERE r.id = ?`,
+    )
+    .get(reviewId) as {
+    id: string;
+    rating: number;
+    comment: string | null;
+    user_id: string;
+    display_name: string;
+    created_at: string;
+  };
+  return toReviewItem(row);
+}

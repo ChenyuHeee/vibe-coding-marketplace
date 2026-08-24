@@ -172,12 +172,14 @@ zip 打包下载 `uploads/projects/<id>/`，返回 `application/zip` 流；未�
 
 ### POST /api/orders/:id/pay — buyer
 模拟支付：余额 ≥ totalCr 则扣款，钱进托管 `escrowStatus=held`，订单 `paid`。
+> 作品类**支付即交付**（PRD）：`paid` 为瞬间态，支付成功后立即自动 `delivered`（响应返回最终状态）。
+> 免费作品（priceCr=0）跳过支付：escrow 保持 `none`，直接 `paid → delivered → completed`（无资金流动，不记台账）。
 ```jsonc
 // res 200
-{ "order": { "id": "o1", "status": "paid", "escrowStatus": "held", "paidAt": "..." },
+{ "order": { "id": "o1", "status": "delivered", "escrowStatus": "held", "paidAt": "...", "deliveredAt": "..." },
   "balanceAfterCr": 5000 }
 ```
-涉及状态词：`pending payment → paid`、escrow `none → held`。
+涉及状态词：`pending payment → paid → delivered`、escrow `none → held`。
 
 ### POST /api/orders/:id/cancel — buyer
 **仅未付款**可取消，一步完成、不追问原因：`pending payment → cancelled`。
@@ -189,30 +191,38 @@ zip 打包下载 `uploads/projects/<id>/`，返回 `application/zip` 流；未�
 ```
 
 ### POST /api/orders/:id/confirm — buyer
-确认收货（放款）：escrow `released` → 卖家钱包入账（卖家 `transactions` 记 payout/分成），订单 `completed`。
+确认收货（放款）：escrow `released` → 卖家钱包入账 **priceCr**（平台收取 feeCr，无平台账户不单独记台账，见 PR-B2-B 说明），订单 `completed`。
 > PRD 4：放款前买家必须先看到交付物——前端在确认弹窗前展示作品试玩/截图。
 
 ### GET /api/orders — 登录（buyer 查自己 / seller 查售出）
 `?role=buyer|seller&status=&page=`：
 ```jsonc
-{ "items": [ { "id": "o1", "orderNo": "...", "project": {...}, "priceCr": 9900, "totalCr": 10395,
-               "status": "paid", "escrowStatus": "held", "createdAt": "..." } ], "page": 1, "total": 8 }
+{ "items": [ { "id": "o1", "orderNo": "...", "project": {...}, "priceCr": 9900, "feeCr": 495, "totalCr": 10395,
+               "status": "paid", "escrowStatus": "held", "createdAt": "...", "paidAt": null } ], "page": 1, "total": 8 }
 ```
+
+### GET /api/orders/:id — 买卖双方
+订单详情（退款入口前端在详情页常驻可见）。无关用户 403。
 
 ### GET /api/library — buyer（My Library）
 已购作品列表（含免费/已下架作品，**两步可达**由前端导航保证）。
 ```jsonc
-{ "items": [ { "project": { "id": "p1", "title": "贪吃蛇 3D", "playUrl": "/play/p1" },
-               "orderId": "o1", "purchasedAt": "...", "status": "completed" } ] }
+{ "items": [ { "project": { "id": "p1", "title": "贪吃蛇 3D", "playUrl": "/play/p1", "priceCr": 9900, "status": "approved" },
+               "orderId": "o1", "orderStatus": "completed", "purchasedAt": "..." } ] }
 ```
 
 ### GET /api/library/:projectId/run — buyer（在线运行）
 ```jsonc
-// res  { "playUrl": "/play/p1?order=o1" }   // 已购者的回放地址（与试玩同域，可带鉴权参数）
+// res  { "playUrl": "/play/p1" }   // 已购者的回放地址（与试玩同域；/play 对已购买家放行，含 delisted）
 ```
 
-### GET /api/library/:projectId/download — buyer / 作者本人
-zip 打包下载 `uploads/projects/<id>/`。返回 `application/zip` 流。
+### POST /api/projects/:id/reviews — 已购买家
+评分：`{ "rating": 1–5, "comment": "可选" }`；一人一作一评（重复 409 CONFLICT）；更新 `projects.avg_rating/rating_count` 与卖家 `rating_avg/rating_count`。
+```jsonc
+// res 201  { "review": { "id": "rv1", "rating": 5, "comment": "好玩", "user": {...}, "createdAt": "..." } }
+```
+
+> 下载端点见 §3 `GET /api/projects/:id/download`（已购 / 作者本人，zip 流）。
 
 ---
 

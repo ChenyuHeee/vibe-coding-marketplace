@@ -30,6 +30,7 @@ import {
 } from '../lib/upload';
 import { calcFeeCr, isNonNegativeInt } from '../lib/money';
 import {
+  addReview,
   canDownloadProject,
   canViewProject,
   createProject,
@@ -275,6 +276,18 @@ router.post('/:id/report', requireAuth, (req, res) => {
   const report = reportProject(req.db, req.params.id, req.user!.id, String(body.reason ?? ''));
   res.status(201).json({ report });
 });
+
+// POST /api/projects/:id/reviews —— 已购买家评分（一人一作一评，1–5 分）
+router.post(
+  '/:id/reviews',
+  requireAuth,
+  requireRole('buyer'),
+  asyncHandler(async (req, res) => {
+    const body = (req.body ?? {}) as { rating?: unknown; comment?: unknown };
+    const review = addReview(req.db, req.user!.id, req.params.id, body.rating, body.comment);
+    res.status(201).json({ review });
+  }),
+);
 
 // GET /api/projects/:id/download —— 已购 / 作者本人（zip 打包）
 router.get(
