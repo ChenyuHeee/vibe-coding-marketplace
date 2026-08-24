@@ -3252,3 +3252,35 @@
 .payout-dialog__hint {
   margin: var(--space-2) 0 0;
 }
+
+/* --------------------------------------------------------------------------
+   CommissionDetailPage：未登录投标区引导（匿名返回 bids:[] 但 bidCount 为真实值）
+   -------------------------------------------------------------------------- */
+.commission-detail__login {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border: 1px dashed var(--color-separator-opaque);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+  flex-wrap: wrap;
+}
+.commission-detail__login p {
+  margin: 0;
+}
+.commission-detail__login-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--color-brand-subtle);
+  color: var(--color-brand);
+  flex-shrink: 0;
+}
+.commission-detail__login > div {
+  flex: 1;
+  min-width: 200px;
+}

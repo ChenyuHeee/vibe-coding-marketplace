@@ -114,6 +114,21 @@ describe('CommissionDetailPage（需求详情）', () => {
     localStorage.clear();
   });
 
+  it('未登录：投标区显示登录引导（不渲染空态），且投标数显示真实 bidCount', async () => {
+    // 匿名（无 token）：后端返回 bids:[] 但 bidCount 为真实值 —— 不再自相矛盾
+    mocked.detail.mockResolvedValue({ commission: makeCommission() });
+    renderDetail('/commissions/c1');
+
+    expect(await screen.findByText('登录后查看投标列表')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /去登录/ })).toBeInTheDocument();
+    // 真实投标数仍显示
+    expect(screen.getByText('投标（1）')).toBeInTheDocument();
+    // 不渲染「还没有投标」空态（避免与投标数矛盾）
+    expect(screen.queryByText('还没有投标')).not.toBeInTheDocument();
+    // 不泄露投标详情（匿名）
+    expect(screen.queryByText('接单老王')).not.toBeInTheDocument();
+  });
+
   it('验收标准锁定视觉：Lock 图标 + 已锁定 + 校验哈希 + 只读', async () => {
     loginAs(['buyer'], 'u-buyer');
     mocked.detail.mockResolvedValue({ commission: makeCommission() });

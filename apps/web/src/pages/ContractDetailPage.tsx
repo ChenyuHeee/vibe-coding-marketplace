@@ -36,7 +36,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { FileDropzone } from '../components/FileDropzone';
 import { EscrowStatusBar } from '../components/EscrowStatusBar';
 import { commissionApi, contractApi } from '../api/commission';
-import { criteriaLines } from './CommissionNewPage';
+import { criteriaLines } from '../lib/criteria';
 import { CONTRACT_STEPS, contractStepIndex } from '../types/commission';
 import { formatCr } from '../lib/format';
 import type { CommissionDetail, ContractDetail, ContractMilestoneItem } from '../types/commission';
