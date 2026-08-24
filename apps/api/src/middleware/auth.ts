@@ -75,3 +75,35 @@ export function requireRole(...roles: Role[]) {
     next();
   };
 }
+
+/** 解析 token 但未登录不拦截（/play、作品详情等「公开但可感知登录态」的端点用） */
+export function requireOptionalAuth(req: Request, _res: Response, next: NextFunction): void {
+  const header = req.headers.authorization;
+  const token = header?.startsWith('Bearer ') ? header.slice('Bearer '.length) : undefined;
+  if (!token) {
+    next();
+    return;
+  }
+  try {
+    const payload = jwt.verify(token, jwtSecret()) as jwt.JwtPayload;
+    const user = payload.sub ? loadAuthUser(req.db, payload.sub) : null;
+    if (user) req.user = user;
+  } catch {
+    // token 无效时按未登录处理，不阻断公开访问
+  }
+  next();
+}
+
+/** 平台管理员守卫（requireAuth 之后使用；demo：admin@vibes.local 的 is_admin=1） */
+export function requireAdmin(req: Request, _res: Response, next: NextFunction): void {
+  const user = req.user;
+  if (!user) {
+    next(ApiError.unauthorized());
+    return;
+  }
+  if (!user.isAdmin) {
+    next(ApiError.forbidden('需要平台管理员权限'));
+    return;
+  }
+  next();
+}

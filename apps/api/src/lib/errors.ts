@@ -67,6 +67,19 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
     return;
   }
 
+  // multer 上传错误（文件过大 / 字段超限等）
+  if (err instanceof Error && err.name === 'MulterError') {
+    const code = (err as { code?: string }).code;
+    const message =
+      code === 'LIMIT_FILE_SIZE'
+        ? '文件大小超过限制（单文件 HTML ≤20MB，zip ≤50MB）'
+        : code === 'LIMIT_UNEXPECTED_FILE'
+          ? '上传字段不合法（仅 file / cover，各一个）'
+          : '上传请求不合法，请检查文件与字段';
+    res.status(400).json({ error: { code: 'VALIDATION', message } });
+    return;
+  }
+
   console.error('[vibe-api] unhandled error:', err);
   res.status(500).json({ error: { code: 'INTERNAL', message: 'Internal server error' } });
 }
